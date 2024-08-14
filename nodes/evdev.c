@@ -46,7 +46,8 @@ handle_io(EventPositionBase * self, int fd, bool is_output)
 		EventData data = {
 			.code = {
 				.ns = 1,
-				.value = (((int32_t) buf.type) << 16) | buf.code,
+				.major = buf.type,
+				.minor = buf.code,
 			},
 			.ttl = 100,
 			.priority = 10,

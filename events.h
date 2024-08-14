@@ -9,7 +9,8 @@ typedef uint32_t EventNamespace;
 
 typedef struct {
 	EventNamespace ns;
-	uint32_t value;
+	uint16_t major;
+	uint16_t minor;
 } EventCode;
 
 typedef struct {

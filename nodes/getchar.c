@@ -22,7 +22,8 @@ handle_io(EventPositionBase * self, int fd, bool is_output)
 	EventData data = {
 		.code = {
 			.ns = 0,
-			.value = 1,
+			.major = 0,
+			.minor = 1,
 		},
 		.ttl = 100,
 		.priority = 10,
@@ -32,7 +33,7 @@ handle_io(EventPositionBase * self, int fd, bool is_output)
 	};
 	if (status == 0) {
 		node->subscription.enabled = false;
-		data.code.value = 2;
+		data.code.minor = 2;
 		data.payload = 0;
 	}
 	for (size_t i = 0; i < node->as_GraphNode.outputs.length; ++i) {

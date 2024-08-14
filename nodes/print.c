@@ -9,7 +9,8 @@ handle_event(EventPositionBase * self, EventNode * event)
 	EventData data = event->data;
 	printf("Event from connector %ld:\n", event->input_index);
 	PRINT_FIELD("%d", code.ns);
-	PRINT_FIELD("%d", code.value);
+	PRINT_FIELD("%d", code.major);
+	PRINT_FIELD("%d", code.minor);
 	PRINT_FIELD("%d", ttl);
 	PRINT_FIELD("%d", priority);
 	PRINT_FIELD("%ld", payload);
