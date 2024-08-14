@@ -1,4 +1,5 @@
-DEPS = libevdev
+DEPS =
+DEPS += libevdev
 CFLAGS = -Wall -Wextra
 ifdef DEBUG
 	CFLAGS += -Og -gdwarf-2
