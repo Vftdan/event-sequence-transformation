@@ -6,6 +6,7 @@
 typedef struct {
 	GraphNode as_GraphNode;
 	IOHandling subscription;
+	int32_t namespace;
 } GetcharGraphNode;
 
 static void
@@ -47,7 +48,7 @@ handle_io(EventPositionBase * self, int fd, bool is_output)
 }
 
 static GraphNode *
-create(GraphNodeSpecification * spec)
+create(GraphNodeSpecification * spec, GraphNodeConfig * config)
 {
 	GetcharGraphNode * node = calloc(1, sizeof(GetcharGraphNode));
 	if (!node) {
@@ -68,7 +69,11 @@ create(GraphNodeSpecification * spec)
 			.handle_io = handle_io,
 			.enabled = true,
 		},
+		.namespace = 0,
 	};
+	if (config) {
+		config_setting_lookup_int(config->options, "namespace", &node->namespace);
+	}
 	return &node->as_GraphNode;
 }
 

@@ -13,6 +13,7 @@ typedef struct {
 	IOHandling subscription;
 	struct libevdev *dev;
 	int fd;
+	int namespace;
 } EvdevGraphNode;
 
 static void
@@ -67,13 +68,22 @@ handle_io(EventPositionBase * self, int fd, bool is_output)
 }
 
 static GraphNode *
-create(GraphNodeSpecification * spec)
+create(GraphNodeSpecification * spec, GraphNodeConfig * config)
 {
 	EvdevGraphNode * node = calloc(1, sizeof(EvdevGraphNode));
 	if (!node) {
 		return NULL;
 	}
-	int fd = open("/dev/input/event7", O_RDONLY | O_NONBLOCK);
+	const char *filename = NULL;
+	if (config) {
+		config_setting_lookup_int(config->options, "namespace", &node->namespace);
+		config_setting_lookup_string(config->options, "file", &filename);
+	}
+	if (filename == NULL) {
+		free(node);
+		return NULL;
+	}
+	int fd = open(filename, O_RDONLY | O_NONBLOCK);
 	int err;
 	if ((err = libevdev_new_from_fd(fd, &node->dev)) < 0) {
 		errno = -err;
@@ -97,6 +107,7 @@ create(GraphNodeSpecification * spec)
 		},
 		.dev = node->dev,
 		.fd = fd,
+		.namespace = node->namespace,
 	};
 	return &node->as_GraphNode;
 }

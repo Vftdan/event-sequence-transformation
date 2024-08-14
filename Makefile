@@ -1,5 +1,6 @@
 DEPS =
 DEPS += libevdev
+DEPS += libconfig
 CFLAGS = -Wall -Wextra
 ifdef DEBUG
 	CFLAGS += -Og -gdwarf-2
@@ -11,7 +12,7 @@ CPPFLAGS += $(shell pkg-config --cflags $(DEPS))
 LDLIBS += $(shell pkg-config --libs $(DEPS))
 INTERP ?=
 MAIN = main
-OBJS = main.o events.o processing.o graph.o nodes/getchar.o nodes/print.o nodes/evdev.o
+OBJS = main.o events.o processing.o graph.o config.o nodes/getchar.o nodes/print.o nodes/evdev.o
 
 all: $(MAIN)
 

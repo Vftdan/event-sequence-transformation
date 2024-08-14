@@ -10,6 +10,7 @@
 // Assuming child type has a field for the base type
 // So for structs it is usually actual downcast, but for unions it is an upcast
 #define DOWNCAST(contype, basename, ptr) containerof(ptr, contype, as_##basename)
+#define lengthof(arr) (sizeof(arr) / sizeof(*arr))
 
 #define DEBUG_PRINT_VALUE(x, fmt) fprintf(stderr, #x " = " fmt "\n", x); fflush(stderr)
 

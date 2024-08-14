@@ -3,6 +3,7 @@
 
 #include "events.h"
 #include "processing.h"
+#include "config.h"
 
 typedef struct graph_node GraphNode;
 typedef struct graph_channel GraphChannel;
@@ -28,14 +29,14 @@ struct graph_channel {
 };
 
 struct graph_node_specification {
-	GraphNode * (*create)(GraphNodeSpecification * self);
+	GraphNode * (*create)(GraphNodeSpecification * self, GraphNodeConfig * config);
 	void (*destroy)(GraphNodeSpecification * self, GraphNode * target);
 	void (*register_io)(GraphNodeSpecification * self, GraphNode * target, ProcessingState * state);
 	char *name;
 };
 
 void graph_channel_init(GraphChannel * ch, GraphNode * start, size_t start_idx, GraphNode * end, size_t end_idx);
-GraphNode *graph_node_new(GraphNodeSpecification * spec);
+GraphNode *graph_node_new(GraphNodeSpecification * spec, GraphNodeConfig * config);
 void graph_node_delete(GraphNode * self);
 void graph_node_register_io(GraphNode * self, ProcessingState * state);
 void graph_channel_list_init(GraphChannelList * lst);

@@ -27,8 +27,9 @@ handle_event(EventPositionBase * self, EventNode * event)
 }
 
 static GraphNode *
-create(GraphNodeSpecification * spec)
+create(GraphNodeSpecification * spec, GraphNodeConfig * config)
 {
+	(void) config;
 	GraphNode * node = calloc(1, sizeof(GraphNode));
 	if (!node) {
 		return node;
