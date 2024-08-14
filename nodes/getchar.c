@@ -28,8 +28,8 @@ handle_io(EventPositionBase * self, int fd, bool is_output)
 		.priority = 10,
 		.payload = buf[0],
 		.modifiers = EMPTY_MODIFIER_SET,
+		.time = get_current_time(),
 	};
-	clock_gettime(CLOCK_MONOTONIC, &data.time);
 	if (status == 0) {
 		node->subscription.enabled = false;
 		data.code.value = 2;

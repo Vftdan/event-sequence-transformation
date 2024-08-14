@@ -1,9 +1,9 @@
 #ifndef EVENTS_H_
 #define EVENTS_H_
 
-#include <time.h>
 #include "defs.h"
 #include "modifiers.h"
+#include "time.h"
 
 typedef uint32_t EventNamespace;
 
@@ -18,7 +18,7 @@ typedef struct {
 	int32_t priority;
 	int64_t payload;
 	ModifierSet modifiers;
-	struct timespec time;
+	AbsoluteTime time;
 } EventData;
 
 typedef struct event_position_base EventPositionBase;

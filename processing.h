@@ -23,17 +23,17 @@ typedef struct {
 typedef struct delay_list DelayList;
 
 struct delay_list {
-	void (*callback) (EventPositionBase * target, void * closure, const struct timespec * time);
+	void (*callback) (EventPositionBase * target, void * closure, const AbsoluteTime * time);
 	EventPositionBase *target;
 	void *closure;
 	DelayList *next;
-	struct timespec time;
+	AbsoluteTime time;
 };
 
 typedef struct {
 	IOSubscriptionList wait_input, wait_output;
 	DelayList *wait_delay;
-	struct timespec reached_time;
+	AbsoluteTime reached_time;
 	int32_t pass_priority;
 	bool has_future_events;
 } ProcessingState;
@@ -42,8 +42,8 @@ void io_subscription_list_init(IOSubscriptionList * lst, size_t capacity);
 void io_subscription_list_deinit(IOSubscriptionList * lst);
 void io_subscription_list_add(IOSubscriptionList * lst, int fd, IOHandling *subscriber);
 
-bool schedule_delay(ProcessingState * state, EventPositionBase * target, void (*callback) (EventPositionBase*, void*, const struct timespec*), const struct timespec * time);
-bool process_io(ProcessingState * state, const struct timespec * timeout);
+bool schedule_delay(ProcessingState * state, EventPositionBase * target, void (*callback) (EventPositionBase*, void*, const AbsoluteTime*), const AbsoluteTime * time);
+bool process_io(ProcessingState * state, const RelativeTime * timeout);
 void process_iteration(ProcessingState * state);
 
 #endif /* end of include guard: PROCESSING_H_ */

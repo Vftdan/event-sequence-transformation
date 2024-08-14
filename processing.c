@@ -117,7 +117,7 @@ run_io_handlers(fd_set * fds, IOSubscriptionList * subs, bool arg)
 }
 
 bool
-process_io(ProcessingState * state, const struct timespec * timeout)
+process_io(ProcessingState * state, const RelativeTime * timeout)
 {
 	int max_fd = 0;
 	fd_set readfds, writefds;
@@ -126,7 +126,7 @@ process_io(ProcessingState * state, const struct timespec * timeout)
 	max_fd = populate_fd_set(&writefds, &state->wait_output, max_fd);
 
 	++max_fd;
-	int ready = pselect(max_fd, &readfds, &writefds, NULL, timeout, NULL);
+	int ready = pselect(max_fd, &readfds, &writefds, NULL, &timeout->relative, NULL);
 
 	if (ready < 0) {
 		FD_ZERO(&readfds);
@@ -143,18 +143,13 @@ process_io(ProcessingState * state, const struct timespec * timeout)
 }
 
 bool
-schedule_delay(ProcessingState * state, EventPositionBase * target, void (*callback) (EventPositionBase*, void*, const struct timespec*), const struct timespec * time)
+schedule_delay(ProcessingState * state, EventPositionBase * target, void (*callback) (EventPositionBase*, void*, const AbsoluteTime*), const AbsoluteTime * time)
 {
 	DelayList **next = &state->wait_delay;
 	while (*next) {
-		struct timespec next_time = (*next)->time;
-		if (next_time.tv_sec > time->tv_sec) {
+		AbsoluteTime next_time = (*next)->time;
+		if (absolute_time_cmp(next_time, *time) > 0) {
 			break;
-		}
-		if (next_time.tv_sec == time->tv_sec) {
-			if (next_time.tv_nsec > time->tv_nsec) {
-				break;
-			}
 		}
 		next = &((*next)->next);
 	}
@@ -174,33 +169,22 @@ schedule_delay(ProcessingState * state, EventPositionBase * target, void (*callb
 	return true;
 }
 
-static const struct timespec ZERO_TS = {
-	.tv_sec = 0,
-	.tv_nsec = 0,
+static const RelativeTime ZERO_TO = {
+	.relative ={
+		.tv_sec = 0,
+		.tv_nsec = 0,
+	}
 };
 
-inline static void
-fix_nsec(struct timespec * ts)
-{
-	if (ts->tv_nsec < 0) {
-		ts->tv_nsec += 1000000000;
-		ts->tv_sec -= 1;
-	}
-}
-
 static bool
-process_single_scheduled(ProcessingState * state, const struct timespec extern_time)
+process_single_scheduled(ProcessingState * state, const AbsoluteTime extern_time)
 {
 	if (!state->wait_delay) {
 		return false;
 	}
-	struct timespec next_scheduled_time = state->wait_delay->time;  // abs
-	if (next_scheduled_time.tv_sec > extern_time.tv_sec) {
+	AbsoluteTime next_scheduled_time = state->wait_delay->time;
+	if (absolute_time_cmp(next_scheduled_time, extern_time) > 0) {
 		return false;
-	} else if (next_scheduled_time.tv_sec == extern_time.tv_sec) {
-		if (next_scheduled_time.tv_nsec > extern_time.tv_nsec) {
-			return false;
-		}
 	}
 	DelayList next_scheduled = *state->wait_delay;
 	free(state->wait_delay);
@@ -217,7 +201,7 @@ process_single_scheduled(ProcessingState * state, const struct timespec extern_t
 }
 
 static bool
-process_events_until(ProcessingState * state, const struct timespec * max_time)
+process_events_until(ProcessingState * state, const AbsoluteTime * max_time)
 {
 	bool stable = true;
 	int32_t next_priority = INT32_MIN;
@@ -225,17 +209,11 @@ process_events_until(ProcessingState * state, const struct timespec * max_time)
 
 	FOREACH_EVENT(ev) {
 		if (max_time) {
-			struct timespec ev_time = ev->data.time;
-			if (ev_time.tv_sec > max_time->tv_sec) {
+			AbsoluteTime ev_time = ev->data.time;
+			if (absolute_time_cmp(ev_time, *max_time) > 0) {
 				// stable = false;
 				state->has_future_events = true;
 				break;
-			} else if (ev_time.tv_sec == max_time->tv_sec) {
-				if (ev_time.tv_nsec > max_time->tv_nsec) {
-					// stable = false;
-					state->has_future_events = true;
-					break;
-				}
 			}
 		}
 
@@ -270,15 +248,10 @@ process_events_until(ProcessingState * state, const struct timespec * max_time)
 			}
 
 			if (max_time) {
-				struct timespec ev_time = ev->data.time;
-				if (ev_time.tv_sec > max_time->tv_sec) {
+				AbsoluteTime ev_time = ev->data.time;
+				if (absolute_time_cmp(ev_time, *max_time) > 0) {
 					state->has_future_events = true;
 					break;
-				} else if (ev_time.tv_sec == max_time->tv_sec) {
-					if (ev_time.tv_nsec > max_time->tv_nsec) {
-						state->has_future_events = true;
-						break;
-					}
 				}
 			}
 
@@ -304,28 +277,21 @@ process_events_until(ProcessingState * state, const struct timespec * max_time)
 void
 process_iteration(ProcessingState * state)
 {
-	struct timespec extern_time;
-	if (clock_gettime(CLOCK_MONOTONIC, &extern_time) < 0) {
-		perror("Failed to get time");
-		exit(1);
-	}
+	AbsoluteTime extern_time = get_current_time();
 
 	// late_by.tv_sec = extern_time.tv_sec - state->reached_time.tv_sec;
 	// late_by.tv_nsec = extern_time.tv_nsec - state->reached_time.tv_nsec;
 	// fix_nsec(&late_by);
 
-	struct timespec next_scheduled_delay;
-	const struct timespec *max_io_timeout = NULL;
+	RelativeTime next_scheduled_delay;
+	const RelativeTime *max_io_timeout = NULL;
 	if (state->has_future_events) {
-		max_io_timeout = &ZERO_TS;
+		max_io_timeout = &ZERO_TO;
 	} else {
 		if (state->wait_delay) {
-			next_scheduled_delay = state->wait_delay->time;  // abs
-			next_scheduled_delay.tv_sec -= extern_time.tv_sec;
-			next_scheduled_delay.tv_nsec -= extern_time.tv_nsec;
-			fix_nsec(&next_scheduled_delay);
-			if (next_scheduled_delay.tv_sec < 0) {
-				max_io_timeout = &ZERO_TS;
+			next_scheduled_delay = absolute_time_sub_absolute(state->wait_delay->time, extern_time);
+			if (relative_time_cmp(next_scheduled_delay, ZERO_TO) < 0) {
+				max_io_timeout = &ZERO_TO;
 			} else {
 				max_io_timeout = &next_scheduled_delay;
 			}
@@ -334,19 +300,16 @@ process_iteration(ProcessingState * state)
 
 	// FIXME reason about timeouts
 	process_io(state, max_io_timeout);
-	// process_io(state, &ZERO_TS);
+	// process_io(state, &ZERO_TO);
 
 	while (true) {
 		bool had_scheduled = process_single_scheduled(state, extern_time);
-		const struct timespec *max_event_time = &extern_time;
+		const AbsoluteTime *max_event_time = &extern_time;
 		if (state->wait_delay) {
-			struct timespec next_scheduled_time = state->wait_delay->time;
+			AbsoluteTime next_scheduled_time = state->wait_delay->time;
 			bool use_scheduled = false;
 			if (!use_scheduled) {
-				use_scheduled = next_scheduled_time.tv_sec > extern_time.tv_sec;
-			}
-			if (!use_scheduled) {
-				use_scheduled = next_scheduled_time.tv_nsec > extern_time.tv_nsec;
+				use_scheduled = absolute_time_cmp(next_scheduled_time, extern_time) > 0;
 			}
 			if (use_scheduled) {
 				max_event_time = &state->wait_delay->time;
@@ -356,6 +319,6 @@ process_iteration(ProcessingState * state)
 		if (!had_scheduled && !had_events) {
 			break;
 		}
-		process_io(state, &ZERO_TS);
+		process_io(state, &ZERO_TO);
 	}
 }

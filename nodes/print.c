@@ -18,7 +18,7 @@ handle_event(EventPositionBase * self, EventNode * event)
 		printf("%02x", data.modifiers.bits[i]);
 	}
 	printf("\n");
-	printf("time = %ld.%09ld\n", data.time.tv_sec, data.time.tv_nsec);
+	printf("time.absolute = %ld.%09ld\n", data.time.absolute.tv_sec, data.time.absolute.tv_nsec);
 	printf("---\n\n");
 	event_destroy(event);
 	return true;

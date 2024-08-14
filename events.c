@@ -37,19 +37,14 @@ event_create(const EventData * content)
 		event->data = *content;
 		event->data.modifiers = modifier_set_copy(content->modifiers);
 	} else {
-		clock_gettime(CLOCK_MONOTONIC, &event->data.time);
+		event->data.time = get_current_time();
 	}
-	struct timespec self_time = event->data.time;
+	AbsoluteTime self_time = event->data.time;
 	EventNode ** list_pos = &LAST_EVENT;
 	FOREACH_EVENT_DESC(other) {
-		struct timespec other_time = other->data.time;
-		if (self_time.tv_sec > other_time.tv_sec) {
+		AbsoluteTime other_time = other->data.time;
+		if (absolute_time_cmp(self_time, other_time) >= 0) {
 			break;
-		}
-		if (self_time.tv_sec == other_time.tv_sec) {
-			if (self_time.tv_nsec >= other_time.tv_nsec) {
-				break;
-			}
 		}
 		list_pos = &other->next->prev;
 	}

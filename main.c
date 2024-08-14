@@ -10,8 +10,8 @@ main(int argc, char ** argv)
 
 	ProcessingState state = (ProcessingState) {
 		.wait_delay = NULL,
+		.reached_time = get_current_time(),
 	};
-	clock_gettime(CLOCK_MONOTONIC, &state.reached_time);
 	io_subscription_list_init(&state.wait_input, 5);
 	io_subscription_list_init(&state.wait_output, 5);
 
