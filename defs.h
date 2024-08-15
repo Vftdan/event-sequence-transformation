@@ -15,6 +15,8 @@
 #define IMPLICIT_CAST(dsttype, srctype, ptr) (((union { typeof(srctype) *src; typeof(dsttype) *dst; }){.src = ptr}).dst)
 #define T_ALLOC(count, T) ((T*)calloc(count, sizeof(T)))
 
+#define MODULE_CONSTRUCTOR(name) __attribute__((constructor)) static void name(void)
+
 #define DEBUG_PRINT_VALUE(x, fmt) fprintf(stderr, #x " = " fmt "\n", x); fflush(stderr)
 
 #endif /* end of include guard: DEFS_H_ */

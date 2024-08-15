@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include "evdev.h"
 #include "../processing.h"
+#include "../module_registry.h"
 
 typedef struct {
 	GraphNode as_GraphNode;
@@ -139,3 +140,8 @@ GraphNodeSpecification nodespec_evdev = (GraphNodeSpecification) {
 	.register_io = &register_io,
 	.name = "evdev",
 };
+
+MODULE_CONSTRUCTOR(init)
+{
+	register_graph_node_specification(&nodespec_evdev);
+}

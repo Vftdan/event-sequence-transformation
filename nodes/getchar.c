@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include "getchar.h"
 #include "../processing.h"
+#include "../module_registry.h"
 
 typedef struct {
 	GraphNode as_GraphNode;
@@ -98,3 +99,8 @@ GraphNodeSpecification nodespec_getchar = (GraphNodeSpecification) {
 	.register_io = &register_io,
 	.name = "getchar",
 };
+
+MODULE_CONSTRUCTOR(init)
+{
+	register_graph_node_specification(&nodespec_getchar);
+}

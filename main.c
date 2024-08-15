@@ -1,14 +1,6 @@
 #include "processing.h"
 #include "hash_table.h"
-#include "nodes/print.h"
-#include "nodes/getchar.h"
-#include "nodes/evdev.h"
-
-GraphNodeSpecification *node_specifications[] = {
-	&nodespec_getchar,
-	&nodespec_print,
-	&nodespec_evdev,
-};
+#include "module_registry.h"
 
 int
 main(int argc, char ** argv)
@@ -42,13 +34,7 @@ main(int argc, char ** argv)
 			fprintf(stderr, "No node type for node %ld \"%s\"\n", i, loaded_config.nodes.items[i].name);
 			exit(1);
 		}
-		GraphNodeSpecification *spec = NULL;
-		for (size_t j = 0; j < lengthof(node_specifications); ++j) {
-			if (strcmp(type_name, node_specifications[j]->name) == 0) {
-				spec = node_specifications[j];
-				break;
-			}
-		}
+		GraphNodeSpecification *spec = lookup_graph_node_specification(type_name);
 		if (!spec) {
 			fprintf(stderr, "Unknown node type \"%s\" for node %ld \"%s\"\n", type_name, i, loaded_config.nodes.items[i].name);
 			exit(1);
@@ -103,5 +89,6 @@ main(int argc, char ** argv)
 
 	io_subscription_list_deinit(&state.wait_output);
 	io_subscription_list_deinit(&state.wait_input);
+	destroy_graph_node_specification_registry();
 	return 0;
 }

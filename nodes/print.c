@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "print.h"
+#include "../module_registry.h"
 
 static bool
 handle_event(EventPositionBase * self, EventNode * event)
@@ -59,3 +60,8 @@ GraphNodeSpecification nodespec_print = (GraphNodeSpecification) {
 	.register_io = NULL,
 	.name = "print",
 };
+
+MODULE_CONSTRUCTOR(init)
+{
+	register_graph_node_specification(&nodespec_print);
+}
