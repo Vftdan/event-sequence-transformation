@@ -25,7 +25,7 @@ event_replicate(EventNode * source, size_t count)
 		replica->data.modifiers = modifier_set_copy(source->data.modifiers);
 		replica->prev = source;
 		replica->next = source->next;
-		source->next->next->prev = replica;
+		source->next->prev = replica;
 		source->next = replica;
 	}
 	return i;
