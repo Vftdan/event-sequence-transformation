@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "events.h"
 
 EventNode
@@ -49,6 +51,10 @@ event_create(const EventData * content)
 		list_pos = &other->next->prev;
 	}
 	EventNode * prev = *list_pos;
+	if (!prev) {
+		fprintf(stderr, "*list_pos is NULL\n");
+		abort();
+	}
 	event->next = prev->next;
 	event->prev = prev;
 	prev->next->prev = event;
