@@ -82,6 +82,7 @@ main(int argc, char ** argv)
 	for (ssize_t i = loaded_config.nodes.length - 1; i >= 0; --i) {
 		graph_node_delete(nodes[i]);
 	}
+	event_destroy_all();
 	free(channels);
 	free(nodes);
 

@@ -72,3 +72,15 @@ event_destroy(EventNode * self)
 	self->next = NULL;
 	free(self);
 }
+
+void event_destroy_all()
+{
+	EventNode *ev;
+	while ((ev = FIRST_EVENT) != &END_EVENTS) {
+		event_destroy(ev);
+		if (ev == FIRST_EVENT) {
+			fprintf(stderr, "Broken doubly linked event list invariant\n");
+			abort();
+		}
+	}
+}

@@ -47,5 +47,6 @@ extern EventNode END_EVENTS;
 size_t event_replicate(EventNode * source, size_t count);
 EventNode * event_create(const EventData * content);
 void event_destroy(EventNode * self);
+void event_destroy_all();
 
 #endif /* end of include guard: EVENTS_H_ */
