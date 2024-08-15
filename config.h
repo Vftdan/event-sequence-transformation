@@ -33,5 +33,6 @@ typedef struct {
 } FullConfig;
 
 bool load_config(const config_setting_t *config_root, FullConfig *config);
+void reset_config(FullConfig *config);
 
 #endif /* end of include guard: CONFIG_H_ */

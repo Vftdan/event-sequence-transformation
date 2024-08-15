@@ -135,3 +135,21 @@ load_config(const config_setting_t *config_root, FullConfig *config)
 	config->channels = load_channels_section(channel_config);
 	return true;
 }
+
+void
+reset_config(FullConfig *config)
+{
+	if (!config) {
+		return;
+	}
+	if (config->nodes.items) {
+		free(config->nodes.items);
+		config->nodes.items = NULL;
+		config->nodes.length = 0;
+	}
+	if (config->channels.items) {
+		free(config->channels.items);
+		config->channels.items = NULL;
+		config->channels.length = 0;
+	}
+}

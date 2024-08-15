@@ -85,6 +85,7 @@ main(int argc, char ** argv)
 	free(channels);
 	free(nodes);
 
+	reset_config(&loaded_config);
 	config_destroy(&config_tree);
 
 	io_subscription_list_deinit(&state.wait_output);
