@@ -11,6 +11,8 @@
 // Assuming child type has a field for the base type
 // So for structs it is usually actual downcast, but for unions it is an upcast
 #define DOWNCAST(contype, basename, ptr) containerof(ptr, contype, as_##basename)
+// Expects ptr to be of type srctype* or void*, returns (dsttype*)ptr
+#define IMPLICIT_CAST(dsttype, srctype, ptr) (((union { typeof(srctype) *src; typeof(dsttype) *dst; }){.src = ptr}).dst)
 #define T_ALLOC(count, T) ((T*)calloc(count, sizeof(T)))
 
 #define DEBUG_PRINT_VALUE(x, fmt) fprintf(stderr, #x " = " fmt "\n", x); fflush(stderr)

@@ -1,4 +1,5 @@
 #include "processing.h"
+#include "hash_table.h"
 #include "nodes/print.h"
 #include "nodes/getchar.h"
 #include "nodes/evdev.h"
@@ -33,6 +34,8 @@ main(int argc, char ** argv)
 	}
 
 	GraphNode **nodes = T_ALLOC(loaded_config.nodes.length, GraphNode*);
+	TYPED_HASH_TABLE(size_t) named_nodes;
+	hash_table_init(&named_nodes, NULL);
 	for (size_t i = 0; i < loaded_config.nodes.length; ++i) {
 		const char* type_name = loaded_config.nodes.items[i].type;
 		if (!type_name) {
@@ -55,6 +58,9 @@ main(int argc, char ** argv)
 			fprintf(stderr, "%ld \"%s\"\n", i, loaded_config.nodes.items[i].name);
 			exit(1);
 		}
+		if (loaded_config.nodes.items[i].name) {
+			hash_table_insert(&named_nodes, hash_table_key_from_cstr(loaded_config.nodes.items[i].name), &i);
+		}
 	}
 
 	GraphChannel *channels = T_ALLOC(loaded_config.channels.length, GraphChannel);
@@ -64,16 +70,13 @@ main(int argc, char ** argv)
 		node_names[0] = loaded_config.channels.items[i].from.name;
 		node_names[1] = loaded_config.channels.items[i].to.name;
 		for (int j = 0; j < 2; ++j) {
-			for (size_t k = 0; k < loaded_config.nodes.length; ++k) {
-				if (strcmp(loaded_config.nodes.items[k].name, node_names[j]) == 0) {
-					end_nodes[j] = nodes[k];
-					break;
-				}
-			}
-			if (!end_nodes[j]) {
+			HashTableIndex k = hash_table_find(&named_nodes, hash_table_key_from_cstr(node_names[j]));
+			if (k < 0) {
+				perror("Errno");
 				fprintf(stderr, "No node named \"%s\"\n", node_names[j]);
 				exit(1);
 			}
+			end_nodes[j] = nodes[named_nodes.value_array[k]];
 		}
 		graph_channel_init(&channels[i],
 			end_nodes[0], loaded_config.channels.items[i].from.index,
@@ -89,6 +92,7 @@ main(int argc, char ** argv)
 		process_iteration(&state);
 	}
 
+	hash_table_deinit(&named_nodes);
 	for (ssize_t i = loaded_config.nodes.length - 1; i >= 0; --i) {
 		graph_node_delete(nodes[i]);
 	}
