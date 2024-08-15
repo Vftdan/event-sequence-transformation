@@ -32,7 +32,7 @@ event_replicate(EventNode * source, size_t count)
 EventNode *
 event_create(const EventData * content)
 {
-	EventNode * event = calloc(1, sizeof(EventNode));
+	EventNode * event = T_ALLOC(1, EventNode);
 	if (content) {
 		event->data = *content;
 		event->data.modifiers = modifier_set_copy(content->modifiers);

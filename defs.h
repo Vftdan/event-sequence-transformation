@@ -6,11 +6,12 @@
 #include <stdlib.h>
 #include <stddef.h>
 
+#define lengthof(arr) (sizeof(arr) / sizeof(*arr))
 #define containerof(ptr, contype, membpath) ((contype*)(0 ? (void)(((contype*)NULL)->membpath = *(ptr)) : (void)0, ((char *)(ptr)) - offsetof(contype, membpath)))
 // Assuming child type has a field for the base type
 // So for structs it is usually actual downcast, but for unions it is an upcast
 #define DOWNCAST(contype, basename, ptr) containerof(ptr, contype, as_##basename)
-#define lengthof(arr) (sizeof(arr) / sizeof(*arr))
+#define T_ALLOC(count, T) ((T*)calloc(count, sizeof(T)))
 
 #define DEBUG_PRINT_VALUE(x, fmt) fprintf(stderr, #x " = " fmt "\n", x); fflush(stderr)
 

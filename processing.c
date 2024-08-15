@@ -35,8 +35,8 @@ io_subscription_list_init(IOSubscriptionList * lst, size_t capacity)
 		.fds = NULL,
 		.subscribers = NULL,
 	};
-	result.fds = calloc(capacity, sizeof(int));
-	result.subscribers = calloc(capacity, sizeof(IOHandling*));
+	result.fds = T_ALLOC(capacity, int);
+	result.subscribers = T_ALLOC(capacity, IOHandling*);
 	if (!result.fds || !result.subscribers)
 		capacity = 0;
 	result.capacity = capacity;

@@ -30,7 +30,7 @@ static GraphNode *
 create(GraphNodeSpecification * spec, GraphNodeConfig * config)
 {
 	(void) config;
-	GraphNode * node = calloc(1, sizeof(GraphNode));
+	GraphNode * node = T_ALLOC(1, GraphNode);
 	if (!node) {
 		return node;
 	}

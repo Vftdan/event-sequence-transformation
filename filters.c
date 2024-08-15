@@ -23,7 +23,7 @@ event_filter_list_extend(EventFilterList * lst)
 	if (lst->values) {
 		new_values = reallocarray(lst->values, capacity, sizeof(EventFilter));
 	} else {
-		new_values = calloc(capacity, sizeof(EventFilter));
+		new_values = T_ALLOC(capacity, EventFilter);
 	}
 	if (!new_values) {
 		return false;

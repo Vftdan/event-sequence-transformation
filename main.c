@@ -32,7 +32,7 @@ main(int argc, char ** argv)
 		exit(1);
 	}
 
-	GraphNode **nodes = calloc(loaded_config.nodes.length, sizeof(GraphNode*));
+	GraphNode **nodes = T_ALLOC(loaded_config.nodes.length, GraphNode*);
 	for (size_t i = 0; i < loaded_config.nodes.length; ++i) {
 		const char* type_name = loaded_config.nodes.items[i].type;
 		if (!type_name) {
@@ -57,7 +57,7 @@ main(int argc, char ** argv)
 		}
 	}
 
-	GraphChannel *channels = calloc(loaded_config.channels.length, sizeof(GraphChannel));
+	GraphChannel *channels = T_ALLOC(loaded_config.channels.length, GraphChannel);
 	for (size_t i = 0; i < loaded_config.channels.length; ++i) {
 		const char *node_names[2];
 		GraphNode *end_nodes[2] = {NULL, NULL};

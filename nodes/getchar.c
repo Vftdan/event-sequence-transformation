@@ -50,7 +50,7 @@ handle_io(EventPositionBase * self, int fd, bool is_output)
 static GraphNode *
 create(GraphNodeSpecification * spec, GraphNodeConfig * config)
 {
-	GetcharGraphNode * node = calloc(1, sizeof(GetcharGraphNode));
+	GetcharGraphNode * node = T_ALLOC(1, GetcharGraphNode);
 	if (!node) {
 		return NULL;
 	}

@@ -35,7 +35,7 @@ load_nodes_section(const config_setting_t *config_section)
 	if (length <= 0) {
 		return result;
 	}
-	result.items = calloc(length, sizeof(GraphNodeConfig));
+	result.items = T_ALLOC(length, GraphNodeConfig);
 	if (!result.items) {
 		return result;
 	}
@@ -112,7 +112,7 @@ load_channels_section(const config_setting_t *config_section)
 	if (length <= 0) {
 		return result;
 	}
-	result.items = calloc(length, sizeof(GraphChannelConfig));
+	result.items = T_ALLOC(length, GraphChannelConfig);
 	if (!result.items) {
 		return result;
 	}

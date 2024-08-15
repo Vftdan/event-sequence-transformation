@@ -70,7 +70,7 @@ handle_io(EventPositionBase * self, int fd, bool is_output)
 static GraphNode *
 create(GraphNodeSpecification * spec, GraphNodeConfig * config)
 {
-	EvdevGraphNode * node = calloc(1, sizeof(EvdevGraphNode));
+	EvdevGraphNode * node = T_ALLOC(1, EvdevGraphNode);
 	if (!node) {
 		return NULL;
 	}
