@@ -38,6 +38,14 @@ static void
 event_predicate_list_clear(EventPredicateList * lst)
 {
 	if (lst->values) {
+		for (size_t i = 0; i < lst->length; ++i) {
+			EventPredicateType type = lst->values[i].type;
+			if (type == EVPRED_CONJUNCTION || type == EVPRED_DISJUNCTION) {
+				if (lst->values[i].aggregate_data.handles) {
+					free(lst->values[i].aggregate_data.handles);
+				}
+			}
+		}
 		free(lst->values);
 		lst->values = NULL;
 	}
@@ -46,16 +54,16 @@ event_predicate_list_clear(EventPredicateList * lst)
 }
 
 EventPredicateHandle
-event_predicate_register(EventPredicate filter)
+event_predicate_register(EventPredicate predicate)
 {
 	size_t i = predicates.length;
 	if (i >= INT32_MAX) {
 		return -1;
 	}
-	while (i <= predicates.capacity) {
+	while (i >= predicates.capacity) {
 		event_predicate_list_extend(&predicates);
 	}
-	predicates.values[i] = filter;
+	predicates.values[i] = predicate;
 	predicates.length = i + 1;
 	return (EventPredicateHandle) i;
 }
@@ -157,6 +165,8 @@ event_predicate_apply(EventPredicateHandle handle, EventNode * event)
 			}
 		}
 		break;
+	default:
+		return EVPREDRES_DISABLED;
 	}
 	if (ptr->inverted) {
 		accepted = !accepted;

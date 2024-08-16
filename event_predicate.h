@@ -41,7 +41,7 @@ struct event_predicate {
 	};
 };
 
-EventPredicateHandle event_predicate_register(EventPredicate filter);
+EventPredicateHandle event_predicate_register(EventPredicate predicate);
 EventPredicate event_predicate_get(EventPredicateHandle handle);
 EventPredicateResult event_predicate_apply(EventPredicateHandle handle, EventNode * event);
 void event_predicate_set_enabled(EventPredicateHandle handle, bool enabled);
