@@ -245,6 +245,126 @@ load_enums_section(const config_setting_t *config_section, ConstantRegistry *con
 	}
 }
 
+static EventPredicateType
+parse_event_predicate_type(const char *name)
+{
+	if (!name) {
+		return EVPRED_INVALID;
+	}
+	if (strcmp(name, "accept") == 0) {
+		return EVPRED_ACCEPT;
+	}
+	if (strcmp(name, "code_ns") == 0) {
+		return EVPRED_CODE_NS;
+	}
+	if (strcmp(name, "code_major") == 0) {
+		return EVPRED_CODE_MAJOR;
+	}
+	if (strcmp(name, "code_minor") == 0) {
+		return EVPRED_CODE_MINOR;
+	}
+	if (strcmp(name, "payload") == 0) {
+		return EVPRED_PAYLOAD;
+	}
+	if (strcmp(name, "conjunction") == 0 || strcmp(name, "and") == 0) {
+		return EVPRED_CONJUNCTION;
+	}
+	if (strcmp(name, "disjunction") == 0 || strcmp(name, "or") == 0) {
+		return EVPRED_DISJUNCTION;
+	}
+	return EVPRED_INVALID;
+}
+
+static EventPredicateHandle
+load_single_predicate(const config_setting_t * setting, EventPredicateHandleRegistry * registry, const ConstantRegistry * constants)
+{
+	const char *name = NULL;
+	const char *type_name = NULL;
+	config_setting_lookup_string(setting, "name", &name);
+	config_setting_lookup_string(setting, "type", &type_name);
+	if (!type_name) {
+		return -1;
+	}
+
+	EventPredicate predicate;
+	EventPredicateType type = parse_event_predicate_type(type_name);
+	predicate.type = type;
+
+	switch (type) {
+	case EVPRED_INVALID:
+		return -1;
+	case EVPRED_ACCEPT:
+		break;
+	case EVPRED_CODE_NS...EVPRED_PAYLOAD:
+		{
+			int64_t min_value = INT64_MIN;
+			int64_t max_value = INT64_MAX;
+			min_value = resolve_constant_or(constants, config_setting_get_member(setting, "min"), min_value);
+			max_value = resolve_constant_or(constants, config_setting_get_member(setting, "max"), max_value);
+			predicate.range_data.min_value = min_value;
+			predicate.range_data.max_value = max_value;
+		}
+		break;
+	case EVPRED_CONJUNCTION:
+	case EVPRED_DISJUNCTION:
+		{
+			config_setting_t *args = config_setting_get_member(setting, "args");
+			EventPredicateHandle *handles = NULL;
+			ssize_t length = config_setting_length(args);
+			if (length > 0) {
+				handles = T_ALLOC(length, EventPredicateHandle);
+				for (ssize_t i = 0; i < length; ++i) {
+					handles[i] = resolve_event_predicate(registry, constants, config_setting_get_elem(args, i));
+				}
+			}
+			predicate.aggregate_data.length = length;
+			predicate.aggregate_data.handles = handles;
+		}
+		break;
+	default:
+		return -1;
+	}
+
+	long long enabled = resolve_constant_or(constants, config_setting_get_member(setting, "enabled"), true);
+	long long inverted = resolve_constant_or(constants, config_setting_get_member(setting, "inverted"), false);
+	predicate.enabled = enabled != 0;
+	predicate.inverted = inverted != 0;
+
+	EventPredicateHandle handle = event_predicate_register(predicate);
+	if (handle < 0) {
+		if ((predicate.type == EVPRED_CONJUNCTION || predicate.type == EVPRED_DISJUNCTION) && predicate.aggregate_data.handles) {
+			free(predicate.aggregate_data.handles);
+			predicate.aggregate_data.handles = NULL;
+			predicate.aggregate_data.length = 0;
+		}
+	}
+
+	return handle;
+}
+
+static void
+load_predicates_section(const config_setting_t *config_section, EventPredicateHandleRegistry *predicates, const ConstantRegistry *constants)
+{
+	if (!config_section) {
+		return;
+	}
+	ssize_t length = config_setting_length(config_section);
+	if (length <= 0) {
+		return;
+	}
+	for (ssize_t i = 0; i < length; ++i) {
+		config_setting_t *predicate_def = config_setting_get_elem(config_section, i);
+		if (!predicate_def) {
+			continue;
+		}
+		const char *name = config_setting_name(predicate_def);
+		EventPredicateHandle handle = resolve_event_predicate(predicates, constants, predicate_def);
+		if (handle >= 0 && name != NULL) {
+			hash_table_insert(predicates, hash_table_key_from_cstr(name), &handle);
+		}
+	}
+}
+
 bool
 load_config(const config_setting_t *config_root, FullConfig *config)
 {
@@ -255,10 +375,13 @@ load_config(const config_setting_t *config_root, FullConfig *config)
 	const config_setting_t *channel_config = config_setting_get_member(config_root, "channels");
 	const config_setting_t *constants_config = config_setting_get_member(config_root, "constants");
 	const config_setting_t *enums_config = config_setting_get_member(config_root, "enums");
+	const config_setting_t *predicates_config = config_setting_get_member(config_root, "predicates");
 	hash_table_init(&config->constants, NULL);
 	populate_event_codes(&config->constants);
 	load_constants_section(constants_config, &config->constants);
 	load_enums_section(enums_config, &config->constants);
+	hash_table_init(&config->predicates, NULL);
+	load_predicates_section(predicates_config, &config->predicates, &config->constants);
 	config->nodes = load_nodes_section(node_config);
 	config->channels = load_channels_section(channel_config, &config->constants);
 	return true;
@@ -281,6 +404,7 @@ reset_config(FullConfig *config)
 		config->channels.length = 0;
 	}
 	hash_table_deinit(&config->constants);
+	hash_table_deinit(&config->predicates);
 }
 
 long long
@@ -304,4 +428,24 @@ resolve_constant_or(const ConstantRegistry * registry, const config_setting_t * 
 		return config_setting_get_int64(setting);
 	}
 	return dflt;
+}
+
+EventPredicateHandle
+resolve_event_predicate(EventPredicateHandleRegistry * registry, const ConstantRegistry * constants, const config_setting_t * setting)
+{
+	if (!setting) {
+		return -1;
+	}
+	if (config_setting_type(setting) == CONFIG_TYPE_STRING) {
+		if (!registry) {
+			return -1;
+		}
+		const char *name = config_setting_get_string(setting);
+		HashTableIndex idx = hash_table_find(registry, hash_table_key_from_cstr(name));
+		if (idx < 0) {
+			return -1;
+		}
+		return registry->value_array[idx];
+	}
+	return load_single_predicate(setting, registry, constants);
 }
