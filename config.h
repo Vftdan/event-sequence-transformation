@@ -38,6 +38,12 @@ typedef struct {
 
 bool load_config(const config_setting_t *config_root, FullConfig *config);
 void reset_config(FullConfig *config);
-long long resolve_constant(const ConstantRegistry * registry, const config_setting_t * setting);
+long long resolve_constant_or(const ConstantRegistry * registry, const config_setting_t * setting, long long dflt);
+
+__attribute__((unused)) inline static long long
+resolve_constant(const ConstantRegistry * registry, const config_setting_t * setting)
+{
+	return resolve_constant_or(registry, setting, 0);
+}
 
 #endif /* end of include guard: CONFIG_H_ */

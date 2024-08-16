@@ -195,21 +195,24 @@ reset_config(FullConfig *config)
 }
 
 long long
-resolve_constant(const ConstantRegistry * registry, const config_setting_t * setting)
+resolve_constant_or(const ConstantRegistry * registry, const config_setting_t * setting, long long dflt)
 {
 	if (!setting) {
-		return 0;
+		return dflt;
 	}
 	if (config_setting_type(setting) == CONFIG_TYPE_STRING) {
 		if (!registry) {
-			return 1;
+			return dflt;
 		}
 		const char *name = config_setting_get_string(setting);
 		HashTableIndex idx = hash_table_find(registry, hash_table_key_from_cstr(name));
 		if (idx < 0) {
-			return 0;
+			return dflt;
 		}
 		return registry->value_array[idx];
 	}
-	return config_setting_get_int64(setting);
+	if (config_setting_is_number(setting)) {
+		return config_setting_get_int64(setting);
+	}
+	return dflt;
 }
