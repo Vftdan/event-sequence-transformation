@@ -1,5 +1,6 @@
 #include <string.h>
 #include "config.h"
+#include "event_code_names.h"
 
 static GraphNodeConfig
 load_single_node_config(const config_setting_t *config_member)
@@ -255,6 +256,7 @@ load_config(const config_setting_t *config_root, FullConfig *config)
 	const config_setting_t *constants_config = config_setting_get_member(config_root, "constants");
 	const config_setting_t *enums_config = config_setting_get_member(config_root, "enums");
 	hash_table_init(&config->constants, NULL);
+	populate_event_codes(&config->constants);
 	load_constants_section(constants_config, &config->constants);
 	load_enums_section(enums_config, &config->constants);
 	config->nodes = load_nodes_section(node_config);
