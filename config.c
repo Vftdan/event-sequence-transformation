@@ -123,6 +123,39 @@ load_channels_section(const config_setting_t *config_section)
 	return result;
 }
 
+static void
+load_constants_section(const config_setting_t *config_section, ConstantRegistry *constants)
+{
+	ssize_t length = config_setting_length(config_section);
+	if (length <= 0) {
+		return;
+	}
+	for (ssize_t i = 0; i < length; ++i) {
+		config_setting_t *item = config_setting_get_elem(config_section, i);
+		if (!item) {
+			continue;
+		}
+		const char *name;
+		long long value;
+		if (!(name = config_setting_name(item))) {
+			config_setting_lookup_string(item, "name", &name);
+		}
+		if (!name) {
+			continue;
+		}
+		if (config_setting_is_scalar(item) == CONFIG_TRUE) {
+			value = config_setting_get_int64(item);
+		} else if (config_setting_is_group(item) == CONFIG_TRUE) {
+			if (config_setting_lookup_int64(item, "value", &value) == CONFIG_FALSE) {
+				continue;
+			}
+		} else {
+			continue;
+		}
+		hash_table_insert(constants, hash_table_key_from_cstr(name), &value);
+	}
+}
+
 bool
 load_config(const config_setting_t *config_root, FullConfig *config)
 {
@@ -131,6 +164,9 @@ load_config(const config_setting_t *config_root, FullConfig *config)
 	}
 	const config_setting_t *node_config = config_setting_get_member(config_root, "nodes");
 	const config_setting_t *channel_config = config_setting_get_member(config_root, "channels");
+	const config_setting_t *constants_config = config_setting_get_member(config_root, "constants");
+	hash_table_init(&config->constants, NULL);
+	load_constants_section(constants_config, &config->constants);
 	config->nodes = load_nodes_section(node_config);
 	config->channels = load_channels_section(channel_config);
 	return true;
@@ -152,4 +188,25 @@ reset_config(FullConfig *config)
 		config->channels.items = NULL;
 		config->channels.length = 0;
 	}
+	hash_table_deinit(&config->constants);
+}
+
+long long
+resolve_constant(const ConstantRegistry * registry, const config_setting_t * setting)
+{
+	if (!setting) {
+		return 0;
+	}
+	if (config_setting_type(setting) == CONFIG_TYPE_STRING) {
+		if (!registry) {
+			return 1;
+		}
+		const char *name = config_setting_get_string(setting);
+		HashTableIndex idx = hash_table_find(registry, hash_table_key_from_cstr(name));
+		if (idx < 0) {
+			return 0;
+		}
+		return registry->value_array[idx];
+	}
+	return config_setting_get_int64(setting);
 }

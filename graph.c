@@ -88,12 +88,12 @@ graph_channel_init(GraphChannel * ch, GraphNode * start, size_t start_idx, Graph
 }
 
 GraphNode *
-graph_node_new(GraphNodeSpecification * spec, GraphNodeConfig * config)
+graph_node_new(GraphNodeSpecification * spec, GraphNodeConfig * config, const ConstantRegistry * constants)
 {
 	if (!spec || !spec->create) {
 		return NULL;
 	}
-	return spec->create(spec, config);
+	return spec->create(spec, config, constants);
 }
 
 void

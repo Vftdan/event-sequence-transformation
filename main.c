@@ -39,7 +39,7 @@ main(int argc, char ** argv)
 			fprintf(stderr, "Unknown node type \"%s\" for node %ld \"%s\"\n", type_name, i, loaded_config.nodes.items[i].name);
 			exit(1);
 		}
-		if (!(nodes[i] = graph_node_new(spec, &loaded_config.nodes.items[i]))) {
+		if (!(nodes[i] = graph_node_new(spec, &loaded_config.nodes.items[i], &loaded_config.constants))) {
 			perror("Failed to create node");
 			fprintf(stderr, "%ld \"%s\"\n", i, loaded_config.nodes.items[i].name);
 			exit(1);
