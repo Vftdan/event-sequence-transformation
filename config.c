@@ -159,6 +159,91 @@ load_constants_section(const config_setting_t *config_section, ConstantRegistry 
 	}
 }
 
+static void
+put_enum_value(ConstantRegistry *registry, const char *enum_name, const char *member_name, const long long value)
+{
+	if (!enum_name || !member_name) {
+		return;
+	}
+	size_t enum_len = strlen(enum_name);
+	size_t member_len = strlen(member_name);
+	size_t mem_size = enum_len + /* "." */ 1 + member_len + /* terminator */ 1;
+	char* qualified_name = malloc(mem_size);
+	qualified_name[0] = '\0';
+	strncat(qualified_name, enum_name, enum_len);
+	strncat(qualified_name, ".", 1);
+	strncat(qualified_name, member_name, member_len);
+	hash_table_insert(registry, hash_table_key_from_cstr(qualified_name), &value);
+	free(qualified_name);
+}
+
+static void
+load_single_enum(const char *enum_name, const config_setting_t *enum_def, ConstantRegistry *constants)
+{
+	ssize_t length = config_setting_length(enum_def);
+	if (length <= 0) {
+		return;
+	}
+	long long prev_value = -1;
+	for (ssize_t i = 0; i < length; ++i) {
+		config_setting_t *member = config_setting_get_elem(enum_def, i);
+		if (!member) {
+			continue;
+		}
+
+		const config_setting_t *value_setting = member;
+		long long value = prev_value + 1;  // FIXME in theory, signed overflow is UB
+		bool only_name = false;
+
+		const char *name = config_setting_name(member);
+		if (!name) {
+			config_setting_lookup_string(member, "name", &name);
+		}
+		if (!name) {
+			name = config_setting_get_string(member);
+			only_name = true;
+		}
+		if (!name) {
+			continue;
+		}
+
+		if (config_setting_is_aggregate(member)) {
+			value_setting = config_setting_get_member(member, "value");
+		}
+
+		if (!only_name) {
+			value = resolve_constant_or(constants, value_setting, value);
+		}
+		prev_value = value;
+
+		put_enum_value(constants, enum_name, name, value);
+	}
+}
+
+static void
+load_enums_section(const config_setting_t *config_section, ConstantRegistry *constants)
+{
+	if (!config_section) {
+		return;
+	}
+	ssize_t length = config_setting_length(config_section);
+	if (length <= 0) {
+		return;
+	}
+	for (ssize_t i = 0; i < length; ++i) {
+		config_setting_t *enum_def = config_setting_get_elem(config_section, i);
+		if (!enum_def) {
+			continue;
+		}
+		const char *name = config_setting_name(enum_def);
+		// DEBUG_PRINT_VALUE(name, "%s");
+		if (!name) {
+			continue;
+		}
+		load_single_enum(name, enum_def, constants);
+	}
+}
+
 bool
 load_config(const config_setting_t *config_root, FullConfig *config)
 {
@@ -168,8 +253,10 @@ load_config(const config_setting_t *config_root, FullConfig *config)
 	const config_setting_t *node_config = config_setting_get_member(config_root, "nodes");
 	const config_setting_t *channel_config = config_setting_get_member(config_root, "channels");
 	const config_setting_t *constants_config = config_setting_get_member(config_root, "constants");
+	const config_setting_t *enums_config = config_setting_get_member(config_root, "enums");
 	hash_table_init(&config->constants, NULL);
 	load_constants_section(constants_config, &config->constants);
+	load_enums_section(enums_config, &config->constants);
 	config->nodes = load_nodes_section(node_config);
 	config->channels = load_channels_section(channel_config, &config->constants);
 	return true;
