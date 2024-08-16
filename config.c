@@ -14,7 +14,7 @@ load_single_node_config(const config_setting_t *config_member)
 	}
 	result.name = config_setting_name(config_member);
 	if (!result.name) {
-		config_setting_lookup_string(config_member, "namd", &result.name);
+		config_setting_lookup_string(config_member, "name", &result.name);
 	}
 	config_setting_lookup_string(config_member, "type", &result.type);
 	result.options = config_setting_get_member(config_member, "options");
@@ -58,8 +58,8 @@ load_channel_end_config(const config_setting_t *config_member, const char **name
 		if (!kv) {
 			return;
 		}
-		*name_ptr = config_setting_name(config_member);
-		*index_ptr = config_setting_get_int64(config_member);
+		*name_ptr = config_setting_name(kv);
+		*index_ptr = config_setting_get_int64(kv);
 		return;
 	}
 	*name_ptr = config_setting_get_string_elem(config_member, 0);
