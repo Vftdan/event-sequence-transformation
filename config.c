@@ -126,6 +126,9 @@ load_channels_section(const config_setting_t *config_section, const ConstantRegi
 static void
 load_constants_section(const config_setting_t *config_section, ConstantRegistry *constants)
 {
+	if (!config_section) {
+		return;
+	}
 	ssize_t length = config_setting_length(config_section);
 	if (length <= 0) {
 		return;
