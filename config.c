@@ -47,7 +47,7 @@ load_nodes_section(const config_setting_t *config_section)
 }
 
 inline static void
-load_channel_end_config(const config_setting_t *config_member, const char **name_ptr, size_t *index_ptr)
+load_channel_end_config(const config_setting_t *config_member, const char **name_ptr, size_t *index_ptr, const ConstantRegistry *constants)
 {
 	ssize_t length = config_setting_length(config_member);
 	if (length < 1) {
@@ -59,15 +59,15 @@ load_channel_end_config(const config_setting_t *config_member, const char **name
 			return;
 		}
 		*name_ptr = config_setting_name(kv);
-		*index_ptr = config_setting_get_int64(kv);
+		*index_ptr = resolve_constant(constants, kv);
 		return;
 	}
 	*name_ptr = config_setting_get_string_elem(config_member, 0);
-	*index_ptr = config_setting_get_int64_elem(config_member, 1);
+	*index_ptr = resolve_constant(constants, config_setting_get_elem(config_member, 1));
 }
 
 static GraphChannelConfig
-load_single_channel_config(const config_setting_t *config_member)
+load_single_channel_config(const config_setting_t *config_member, const ConstantRegistry *constants)
 {
 	GraphChannelConfig result = {
 		.from = {NULL, 0},
@@ -93,13 +93,13 @@ load_single_channel_config(const config_setting_t *config_member)
 		ends[0] = ends[1];
 		ends[1] = tmp;
 	}
-	load_channel_end_config(ends[0], &result.from.name, &result.from.index);
-	load_channel_end_config(ends[1], &result.to.name, &result.to.index);
+	load_channel_end_config(ends[0], &result.from.name, &result.from.index, constants);
+	load_channel_end_config(ends[1], &result.to.name, &result.to.index, constants);
 	return result;
 }
 
 static GraphChannelConfigSection
-load_channels_section(const config_setting_t *config_section)
+load_channels_section(const config_setting_t *config_section, const ConstantRegistry *constants)
 {
 	GraphChannelConfigSection result = {
 		.length = 0,
@@ -117,7 +117,7 @@ load_channels_section(const config_setting_t *config_section)
 		return result;
 	}
 	for (ssize_t i = 0; i < length; ++i) {
-		result.items[i] = load_single_channel_config(config_setting_get_elem(config_section, i));
+		result.items[i] = load_single_channel_config(config_setting_get_elem(config_section, i), constants);
 	}
 	result.length = length;
 	return result;
@@ -168,7 +168,7 @@ load_config(const config_setting_t *config_root, FullConfig *config)
 	hash_table_init(&config->constants, NULL);
 	load_constants_section(constants_config, &config->constants);
 	config->nodes = load_nodes_section(node_config);
-	config->channels = load_channels_section(channel_config);
+	config->channels = load_channels_section(channel_config, &config->constants);
 	return true;
 }
 
