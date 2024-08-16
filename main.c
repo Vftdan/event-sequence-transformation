@@ -87,6 +87,7 @@ main(int argc, char ** argv)
 	free(nodes);
 
 	reset_config(&loaded_config);
+	event_predicate_reset();
 	config_destroy(&config_tree);
 
 	io_subscription_list_deinit(&state.wait_output);
