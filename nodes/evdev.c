@@ -69,7 +69,7 @@ handle_io(EventPositionBase * self, int fd, bool is_output)
 }
 
 static GraphNode *
-create(GraphNodeSpecification * spec, GraphNodeConfig * config, const ConstantRegistry * constants)
+create(GraphNodeSpecification * spec, GraphNodeConfig * config, InitializationEnvironment * env)
 {
 	EvdevGraphNode * node = T_ALLOC(1, EvdevGraphNode);
 	if (!node) {
@@ -77,7 +77,7 @@ create(GraphNodeSpecification * spec, GraphNodeConfig * config, const ConstantRe
 	}
 	const char *filename = NULL;
 	if (config) {
-		node->namespace = resolve_constant(constants, config_setting_get_member(config->options, "namespace"));
+		node->namespace = env_resolve_constant(env, config_setting_get_member(config->options, "namespace"));
 		config_setting_lookup_string(config->options, "file", &filename);
 	}
 	if (filename == NULL) {

@@ -21,10 +21,10 @@ handle_event(EventPositionBase * self, EventNode * event)
 }
 
 static GraphNode *
-create(GraphNodeSpecification * spec, GraphNodeConfig * config, const ConstantRegistry * constants)
+create(GraphNodeSpecification * spec, GraphNodeConfig * config, InitializationEnvironment * env)
 {
 	(void) config;
-	(void) constants;
+	(void) env;
 	GraphNode * node = T_ALLOC(1, GraphNode);
 	if (!node) {
 		return node;

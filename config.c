@@ -449,3 +449,15 @@ resolve_event_predicate(EventPredicateHandleRegistry * registry, const ConstantR
 	}
 	return load_single_predicate(setting, registry, constants);
 }
+
+long long
+env_resolve_constant_or(InitializationEnvironment * env, const config_setting_t * setting, long long dflt)
+{
+	return resolve_constant_or(&env->constants, setting, dflt);
+}
+
+EventPredicateHandle
+env_resolve_event_predicate(InitializationEnvironment * env, const config_setting_t * setting)
+{
+	return resolve_event_predicate(&env->predicates, &env->constants, setting);
+}

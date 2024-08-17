@@ -49,7 +49,7 @@ handle_io(EventPositionBase * self, int fd, bool is_output)
 }
 
 static GraphNode *
-create(GraphNodeSpecification * spec, GraphNodeConfig * config, const ConstantRegistry * constants)
+create(GraphNodeSpecification * spec, GraphNodeConfig * config, InitializationEnvironment * env)
 {
 	GetcharGraphNode * node = T_ALLOC(1, GetcharGraphNode);
 	if (!node) {
@@ -70,7 +70,7 @@ create(GraphNodeSpecification * spec, GraphNodeConfig * config, const ConstantRe
 			.handle_io = handle_io,
 			.enabled = true,
 		},
-		.namespace = resolve_constant(constants, config_setting_get_member(config->options, "namespace")),
+		.namespace = env_resolve_constant(env, config_setting_get_member(config->options, "namespace")),
 	};
 	return &node->as_GraphNode;
 }
