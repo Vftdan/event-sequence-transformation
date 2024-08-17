@@ -9,6 +9,8 @@ typedef struct {
 	uint8_t *bits;
 } ModifierSet;
 
+typedef int32_t Modifier;
+
 #define EMPTY_MODIFIER_SET ((ModifierSet) {.byte_length = 0, .bits = NULL})
 
 __attribute__((unused)) inline static ModifierSet
@@ -82,6 +84,61 @@ modifier_set_toggle_from(ModifierSet * target, const ModifierSet source)
 		}
 		target->bits[i] ^= source.bits[i];
 	}
+}
+
+__attribute__((unused)) inline static void
+modifier_index_and_mask(Modifier modifier, size_t * byte_index, uint8_t * mask)
+{
+	if (byte_index) {
+		*byte_index = modifier >> 3;
+	}
+	if (mask) {
+		*mask = 1 << (modifier & 7);
+	}
+}
+
+__attribute__((unused)) inline static bool
+modifier_set_has(ModifierSet collection, Modifier element)
+{
+	size_t byte_index;
+	uint8_t mask;
+	modifier_index_and_mask(element, &byte_index, &mask);
+	if (byte_index >= collection.byte_length) {
+		return false;
+	}
+	return (collection.bits[byte_index] & mask) != 0;
+}
+
+__attribute__((unused)) inline static void
+modifier_set_set(ModifierSet * target, Modifier element)
+{
+	size_t byte_index;
+	uint8_t mask;
+	modifier_index_and_mask(element, &byte_index, &mask);
+	modifier_set_extend(target, byte_index + 1);
+	target->bits[byte_index] |= mask;
+}
+
+__attribute__((unused)) inline static void
+modifier_set_unset(ModifierSet * target, Modifier element)
+{
+	size_t byte_index;
+	uint8_t mask;
+	modifier_index_and_mask(element, &byte_index, &mask);
+	if (byte_index >= target->byte_length) {
+		return;
+	}
+	target->bits[byte_index] &= ~mask;
+}
+
+__attribute__((unused)) inline static void
+modifier_set_toggle(ModifierSet * target, Modifier element)
+{
+	size_t byte_index;
+	uint8_t mask;
+	modifier_index_and_mask(element, &byte_index, &mask);
+	modifier_set_extend(target, byte_index + 1);
+	target->bits[byte_index] ^= mask;
 }
 
 #endif /* end of include guard: MODIFIERS_H_ */
