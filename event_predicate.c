@@ -168,6 +168,14 @@ event_predicate_apply(EventPredicateHandle handle, EventNode * event)
 			}
 		}
 		break;
+	case EVPRED_MODIFIER:
+		if (!event) {
+			return EVPREDRES_DISABLED;
+		}
+		{
+			accepted = modifier_set_has(event->data.modifiers, ptr->single_modifier);
+		}
+		break;
 	default:
 		return EVPREDRES_DISABLED;
 	}

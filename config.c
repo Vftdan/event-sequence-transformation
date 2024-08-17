@@ -275,6 +275,9 @@ parse_event_predicate_type(const char *name)
 	if (strcmp(name, "disjunction") == 0 || strcmp(name, "or") == 0) {
 		return EVPRED_DISJUNCTION;
 	}
+	if (strcmp(name, "modifier") == 0) {
+		return EVPRED_MODIFIER;
+	}
 	return EVPRED_INVALID;
 }
 
@@ -322,6 +325,15 @@ load_single_predicate(const config_setting_t * setting, EventPredicateHandleRegi
 			}
 			predicate.aggregate_data.length = length;
 			predicate.aggregate_data.handles = handles;
+		}
+		break;
+	case EVPRED_MODIFIER:
+		{
+			long long modifier = resolve_constant_or(constants, config_setting_get_member(setting, "modifier"), -1);
+			if (modifier < 0 || modifier > MODIFIER_MAX) {
+				return -1;
+			}
+			predicate.single_modifier = modifier;
 		}
 		break;
 	default:

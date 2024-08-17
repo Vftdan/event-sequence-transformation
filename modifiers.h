@@ -12,6 +12,7 @@ typedef struct {
 typedef int32_t Modifier;
 
 #define EMPTY_MODIFIER_SET ((ModifierSet) {.byte_length = 0, .bits = NULL})
+#define MODIFIER_MAX ((Modifier) 0xFFFFF)
 
 __attribute__((unused)) inline static ModifierSet
 modifier_set_copy(const ModifierSet old)

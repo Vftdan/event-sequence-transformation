@@ -18,6 +18,8 @@ typedef enum {
 	// Aggregation
 	EVPRED_CONJUNCTION,
 	EVPRED_DISJUNCTION,
+	// Modifier
+	EVPRED_MODIFIER,
 } EventPredicateType;
 
 typedef enum {
@@ -39,6 +41,7 @@ struct event_predicate {
 			size_t length;
 			EventPredicateHandle *handles;
 		} aggregate_data;
+		Modifier single_modifier;
 	};
 };
 
