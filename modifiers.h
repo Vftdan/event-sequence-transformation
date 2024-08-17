@@ -11,6 +11,12 @@ typedef struct {
 
 typedef int32_t Modifier;
 
+typedef enum {
+	MODOP_SET,
+	MODOP_UNSET,
+	MODOP_TOGGLE,
+} ModifierOperation;
+
 #define EMPTY_MODIFIER_SET ((ModifierSet) {.byte_length = 0, .bits = NULL})
 #define MODIFIER_MAX ((Modifier) 0xFFFFF)
 
@@ -140,6 +146,59 @@ modifier_set_toggle(ModifierSet * target, Modifier element)
 	modifier_index_and_mask(element, &byte_index, &mask);
 	modifier_set_extend(target, byte_index + 1);
 	target->bits[byte_index] ^= mask;
+}
+
+__attribute__((unused)) inline static void
+modifier_set_operation_from(ModifierSet * target, const ModifierSet source, ModifierOperation op)
+{
+	switch (op) {
+	case MODOP_SET:
+		modifier_set_set_from(target, source);
+		return;
+	case MODOP_UNSET:
+		modifier_set_unset_from(target, source);
+		return;
+	case MODOP_TOGGLE:
+		modifier_set_toggle_from(target, source);
+		return;
+	}
+}
+
+__attribute__((unused)) inline static void
+modifier_set_operation(ModifierSet * target, Modifier element, ModifierOperation op)
+{
+	switch (op) {
+	case MODOP_SET:
+		modifier_set_set(target, element);
+		return;
+	case MODOP_UNSET:
+		modifier_set_unset(target, element);
+		return;
+	case MODOP_TOGGLE:
+		modifier_set_toggle(target, element);
+		return;
+	}
+}
+
+__attribute__((unused)) inline static ModifierOperation
+modifier_operation_parse(const char* name)
+{
+	if (!name) {
+		return -1;
+	}
+	if (strcmp(name, "set") == 0) {
+		return MODOP_SET;
+	}
+	if (strcmp(name, "unset") == 0) {
+		return MODOP_UNSET;
+	}
+	if (strcmp(name, "reset") == 0) {
+		return MODOP_UNSET;
+	}
+	if (strcmp(name, "togggle") == 0) {
+		return MODOP_TOGGLE;
+	}
+	return -1;
 }
 
 #endif /* end of include guard: MODIFIERS_H_ */
