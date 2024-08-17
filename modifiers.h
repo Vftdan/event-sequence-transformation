@@ -122,7 +122,9 @@ modifier_set_set(ModifierSet * target, Modifier element)
 	size_t byte_index;
 	uint8_t mask;
 	modifier_index_and_mask(element, &byte_index, &mask);
-	modifier_set_extend(target, byte_index + 1);
+	if (!modifier_set_extend(target, byte_index + 1)) {
+		return;
+	}
 	target->bits[byte_index] |= mask;
 }
 
@@ -144,7 +146,9 @@ modifier_set_toggle(ModifierSet * target, Modifier element)
 	size_t byte_index;
 	uint8_t mask;
 	modifier_index_and_mask(element, &byte_index, &mask);
-	modifier_set_extend(target, byte_index + 1);
+	if (!modifier_set_extend(target, byte_index + 1)) {
+		return;
+	}
 	target->bits[byte_index] ^= mask;
 }
 
