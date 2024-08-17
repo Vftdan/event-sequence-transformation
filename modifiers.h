@@ -54,6 +54,9 @@ modifier_set_set_from(ModifierSet * target, const ModifierSet source)
 {
 	modifier_set_extend(target, source.byte_length);
 	for (size_t i = 0; i < target->byte_length; ++i) {
+		if (i >= source.byte_length) {
+			return;
+		}
 		target->bits[i] |= source.bits[i];
 	}
 }
@@ -62,6 +65,9 @@ __attribute__((unused)) inline static void
 modifier_set_unset_from(ModifierSet * target, const ModifierSet source)
 {
 	for (size_t i = 0; i < target->byte_length; ++i) {
+		if (i >= source.byte_length) {
+			return;
+		}
 		target->bits[i] &= ~source.bits[i];
 	}
 }
@@ -71,6 +77,9 @@ modifier_set_toggle_from(ModifierSet * target, const ModifierSet source)
 {
 	modifier_set_extend(target, source.byte_length);
 	for (size_t i = 0; i < target->byte_length; ++i) {
+		if (i >= source.byte_length) {
+			return;
+		}
 		target->bits[i] ^= source.bits[i];
 	}
 }
