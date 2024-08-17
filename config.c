@@ -266,6 +266,9 @@ parse_event_predicate_type(const char *name)
 	if (strcmp(name, "payload") == 0) {
 		return EVPRED_PAYLOAD;
 	}
+	if (strcmp(name, "input_index") == 0) {
+		return EVPRED_INPUT_INDEX;
+	}
 	if (strcmp(name, "conjunction") == 0 || strcmp(name, "and") == 0) {
 		return EVPRED_CONJUNCTION;
 	}
@@ -295,7 +298,7 @@ load_single_predicate(const config_setting_t * setting, EventPredicateHandleRegi
 		return -1;
 	case EVPRED_ACCEPT:
 		break;
-	case EVPRED_CODE_NS...EVPRED_PAYLOAD:
+	case EVPRED_CODE_NS...EVPRED_INPUT_INDEX:
 		{
 			int64_t min_value = INT64_MIN;
 			int64_t max_value = INT64_MAX;

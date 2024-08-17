@@ -109,7 +109,7 @@ event_predicate_apply(EventPredicateHandle handle, EventNode * event)
 	case EVPRED_ACCEPT:
 		accepted = true;
 		break;
-	case EVPRED_CODE_NS...EVPRED_PAYLOAD:
+	case EVPRED_CODE_NS...EVPRED_INPUT_INDEX:
 		if (!event) {
 			return EVPREDRES_DISABLED;
 		}
@@ -127,6 +127,9 @@ event_predicate_apply(EventPredicateHandle handle, EventNode * event)
 				break;
 			case EVPRED_PAYLOAD:
 				actual = event->data.payload;
+				break;
+			case EVPRED_INPUT_INDEX:
+				actual = event->input_index;
 				break;
 			default:
 				return EVPREDRES_DISABLED;
