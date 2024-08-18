@@ -35,6 +35,7 @@ lookup_graph_node_specification(const char * name)
 }
 
 void
+__attribute__((destructor)) void
 destroy_graph_node_specification_registry()
 {
 	ensure_initialized();

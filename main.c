@@ -92,6 +92,5 @@ main(int argc, char ** argv)
 
 	io_subscription_list_deinit(&state.wait_output);
 	io_subscription_list_deinit(&state.wait_input);
-	destroy_graph_node_specification_registry();
 	return 0;
 }
