@@ -84,6 +84,10 @@ main(int argc, char ** argv)
 			return 1;
 		}
 	}
+	if (optind < argc) {
+		fprintf(stderr, "Unexpected positional argument at position %d: %s\n", optind, argv[optind]);
+		return 1;
+	}
 
 	ProcessingState state = (ProcessingState) {
 		.wait_delay = NULL,
