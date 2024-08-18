@@ -65,9 +65,9 @@ main(int argc, char ** argv)
 					fprintf(stderr, "Unknown node type \"%s\"\n", optarg);
 					return 1;
 				}
-				const char* module_help = NULL;
+				const char* module_help = spec->documentation;
 				if (module_help) {
-					printf("Help for module \"%s\":\n", optarg);
+					printf("Help for node type \"%s\":\n", optarg);
 					printf("%s\n", module_help);
 				} else {
 					printf("No help provided for node type \"%s\"\n", optarg);

@@ -60,6 +60,8 @@ GraphNodeSpecification nodespec_print = (GraphNodeSpecification) {
 	.destroy = &destroy,
 	.register_io = NULL,
 	.name = "print",
+	.documentation = "Prints received events\nAccepts events on any connector\nDoes not send events"
+	,
 };
 
 MODULE_CONSTRUCTOR(init)

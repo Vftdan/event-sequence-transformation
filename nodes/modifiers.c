@@ -91,6 +91,10 @@ GraphNodeSpecification nodespec_modifiers = (GraphNodeSpecification) {
 	.destroy = &destroy,
 	.register_io = NULL,
 	.name = "modifiers",
+	.documentation = "Sets/unsets/toggles modifiers in an event\nAccepts events on any connector\nSends events on all connectors"
+	                 "\nOption 'operation' (required): the operation to apply to the event modifier set ('set'/'unset'/'toggle')"
+	                 "\nOption 'modifiers' (required): collection of integers --- the set of modifiers to operate on"
+	,
 };
 
 MODULE_CONSTRUCTOR(init)

@@ -139,6 +139,10 @@ GraphNodeSpecification nodespec_evdev = (GraphNodeSpecification) {
 	.destroy = &destroy,
 	.register_io = &register_io,
 	.name = "evdev",
+	.documentation = "Reads evdev events of the specified device\nDoes not accept events\nSends events on all connectors with major code, minor code, payload respectively set to evdev event type, code, value"
+	                 "\nOption 'namespace' (optional): set namespace for the generated events"
+	                 "\nOption 'file' (required): device file to read events from (like '/dev/input/eventN'), the process must have sufficient privileges to read the file"
+	,
 };
 
 MODULE_CONSTRUCTOR(init)

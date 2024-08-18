@@ -33,6 +33,7 @@ struct graph_node_specification {
 	void (*destroy)(GraphNodeSpecification * self, GraphNode * target);
 	void (*register_io)(GraphNodeSpecification * self, GraphNode * target, ProcessingState * state);
 	char *name;
+	char *documentation;
 };
 
 void graph_channel_init(GraphChannel * ch, GraphNode * start, size_t start_idx, GraphNode * end, size_t end_idx);

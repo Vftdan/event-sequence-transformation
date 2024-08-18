@@ -94,6 +94,13 @@ GraphNodeSpecification nodespec_modify_predicate = (GraphNodeSpecification) {
 	.destroy = &destroy,
 	.register_io = NULL,
 	.name = "modify_predicate",
+	.documentation = "Changes 'enabled' and 'inverted' flags of a predicate\nAccepts events on any connector\nDoes not send events"
+	                 "\nOption 'target' (required): the predicate to modify"
+	                 "\nOption 'enable_on' (optional): the predicate, satisfying events of which set 'enabled' flag of the target predicate to 1"
+	                 "\nOption 'disable_on' (optional): the predicate, satisfying events of which set 'enabled' flag of the target predicate to 0"
+	                 "\nOption 'invert_on' (optional): the predicate, satisfying events of which set 'inverted' flag of the target predicate to 1"
+	                 "\nOption 'uninvert_on' (optional): the predicate, satisfying events of which set 'inverted' flag of the target predicate to 0"
+	,
 };
 
 MODULE_CONSTRUCTOR(init)

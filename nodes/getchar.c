@@ -95,6 +95,9 @@ GraphNodeSpecification nodespec_getchar = (GraphNodeSpecification) {
 	.destroy = &destroy,
 	.register_io = &register_io,
 	.name = "getchar",
+	.documentation = "Converts stdin bytes to events\nDoes not accept events\nSends events on all connectors with major and minor codes (0, 1) and the read byte as payload"
+	                 "\nOption 'namespace' (optional): set namespace for the generated events"
+	,
 };
 
 MODULE_CONSTRUCTOR(init)

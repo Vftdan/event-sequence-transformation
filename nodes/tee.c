@@ -53,6 +53,8 @@ GraphNodeSpecification nodespec_tee = (GraphNodeSpecification) {
 	.destroy = &destroy,
 	.register_io = NULL,
 	.name = "tee",
+	.documentation = "Copies the received events\nAccepts events on any connector\nSends events on all connectors"
+	,
 };
 
 MODULE_CONSTRUCTOR(init)

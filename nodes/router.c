@@ -88,6 +88,9 @@ GraphNodeSpecification nodespec_router = (GraphNodeSpecification) {
 	.destroy = &destroy,
 	.register_io = NULL,
 	.name = "router",
+	.documentation = "Conditionally copies the received events\nAccepts events on any connector\nSends events on all connectors with configured predicates"
+	                 "\nOption 'predicates' (required): collection of predicates in the order of output connectors from zero, a received event is copied to the given connector iff it satisfies the predicate"
+	,
 };
 
 MODULE_CONSTRUCTOR(init)
