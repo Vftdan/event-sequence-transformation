@@ -11,9 +11,9 @@ static bool
 handle_event(EventPositionBase * self, EventNode * event)
 {
 	RouterGraphNode *node = DOWNCAST(RouterGraphNode, GraphNode, DOWNCAST(GraphNode, EventPositionBase, self));
-	for (size_t i = 0; i < node->length; ++i) {
-		if (i >= node->as_GraphNode.outputs.length) {
-			break;
+	for (ssize_t i = node->length - 1; i >= 0; --i) {
+		if ((size_t) i >= node->as_GraphNode.outputs.length) {
+			continue;
 		}
 		if (event_predicate_apply(node->predicates[i], event) == EVPREDRES_ACCEPTED) {
 			if (event_replicate(event, 1)) {
