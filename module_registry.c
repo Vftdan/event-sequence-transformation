@@ -1,7 +1,6 @@
 #include "module_registry.h"
-#include "hash_table.h"
 
-static TYPED_HASH_TABLE(GraphNodeSpecification*) registry;
+static GraphNodeSpecificationRegistry registry;
 static bool initialized = false;
 
 static void
@@ -34,7 +33,13 @@ lookup_graph_node_specification(const char * name)
 	return registry.value_array[idx];
 }
 
-void
+const GraphNodeSpecificationRegistry *
+get_graph_node_specification_registy()
+{
+	ensure_initialized();
+	return &registry;
+}
+
 __attribute__((destructor)) void
 destroy_graph_node_specification_registry()
 {
