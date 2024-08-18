@@ -118,7 +118,7 @@ main(int argc, char ** argv)
 		}
 		if (!(nodes[i] = graph_node_new(spec, &loaded_config.nodes.items[i], &loaded_config.environment))) {
 			perror("Failed to create node");
-			fprintf(stderr, "%ld \"%s\"\n", i, loaded_config.nodes.items[i].name);
+			fprintf(stderr, "Node %ld \"%s\"\n", i, loaded_config.nodes.items[i].name);
 			exit(1);
 		}
 		if (loaded_config.nodes.items[i].name) {
