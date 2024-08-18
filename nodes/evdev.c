@@ -76,8 +76,10 @@ create(GraphNodeSpecification * spec, GraphNodeConfig * config, InitializationEn
 		return NULL;
 	}
 	const char *filename = NULL;
+	bool should_grab = false;
 	if (config) {
 		node->namespace = env_resolve_constant(env, config_setting_get_member(config->options, "namespace"));
+		should_grab = env_resolve_constant(env, config_setting_get_member(config->options, "grab")) != 0;
 		config_setting_lookup_string(config->options, "file", &filename);
 	}
 	if (filename == NULL) {
@@ -90,6 +92,14 @@ create(GraphNodeSpecification * spec, GraphNodeConfig * config, InitializationEn
 		errno = -err;
 		free(node);
 		return NULL;
+	}
+	if (should_grab) {
+		if ((err = libevdev_grab(node->dev, LIBEVDEV_GRAB)) < 0) {
+			errno = -err;
+			libevdev_free(node->dev);
+			free(node);
+			return NULL;
+		}
 	}
 	*node = (EvdevGraphNode) {
 		.as_GraphNode = {
@@ -142,6 +152,7 @@ GraphNodeSpecification nodespec_evdev = (GraphNodeSpecification) {
 	.documentation = "Reads evdev events of the specified device\nDoes not accept events\nSends events on all connectors with major code, minor code, payload respectively set to evdev event type, code, value"
 	                 "\nOption 'namespace' (optional): set namespace for the generated events"
 	                 "\nOption 'file' (required): device file to read events from (like '/dev/input/eventN'), the process must have sufficient privileges to read the file"
+	                 "\nOption 'grab' (optional): whether to prevent others from receiving events from this device"
 	,
 };
 
