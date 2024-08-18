@@ -168,12 +168,19 @@ put_enum_value(ConstantRegistry *registry, const char *enum_name, const char *me
 	}
 	size_t enum_len = strlen(enum_name);
 	size_t member_len = strlen(member_name);
-	size_t mem_size = enum_len + /* "." */ 1 + member_len + /* terminator */ 1;
+	size_t mem_size = enum_len + /* "." */ 1 + member_len + /* terminator */ 1 + /* additional protection ??? */ 2;
+	if (mem_size <= enum_len || mem_size <= member_len) {
+		// Overflow
+		return;
+	}
 	char* qualified_name = malloc(mem_size);
+	if (!qualified_name) {
+		return;
+	}
 	qualified_name[0] = '\0';
-	strncat(qualified_name, enum_name, enum_len);
-	strncat(qualified_name, ".", 1);
-	strncat(qualified_name, member_name, member_len);
+	strncat(qualified_name, enum_name, enum_len + 1);  // -Wstringop-truncation, why?
+	strncat(qualified_name, ".", 1);  // But you don't want 2 here?
+	strncat(qualified_name, member_name, member_len + 1);
 	hash_table_insert(registry, hash_table_key_from_cstr(qualified_name), &value);
 	free(qualified_name);
 }
