@@ -1,12 +1,89 @@
+#include <getopt.h>
+#include <stdio.h>
 #include "processing.h"
 #include "hash_table.h"
 #include "module_registry.h"
 
+union __attribute__((transparent_union)) option_ident {
+	enum {
+		NCOPT_BASE = 0xFF,
+		NCOPT_MODULE_HELP,
+	} as_nonchar;
+	int as_int;
+	// No "as_char" field, because it can cause problems on big-endian CPUs
+};
+
 int
 main(int argc, char ** argv)
 {
-	(void)argc;
-	(void)argv;
+	const char* config_filename = "config.cfg";
+
+	while (true) {
+		static const struct option long_options [] = {
+			{"config",         required_argument, NULL, 'c'},
+			{"help",           no_argument,       NULL, 'h'},
+			{"list-modules",   no_argument,       NULL, 'l'},
+			{"module-help",    required_argument, NULL, NCOPT_MODULE_HELP},
+		{NULL, 0, NULL, 0}};
+		static const char help_fstring[] =
+			"Usage: %s <[options...]>\n"
+			"Options:\n"
+			"\t--config <filename>, -c <filename>  read configuration from <filename>\n"
+			"\t                                    instead of ./config.cfg\n"
+			"\t--help, -h                          show this message\n"
+			"\t--list-modules, -l                  list currently loaded node types\n"
+			"\t--module-help <name>                print help information provided for node type <name>\n"
+		;
+
+		union option_ident opt = {.as_int = getopt_long(argc, argv, "c:hl", long_options, NULL)};
+		if (opt.as_int < 0) {
+			break;
+		}
+
+		switch (opt.as_int) {
+		case 'c':
+			config_filename = optarg;
+			break;
+		case 'h':
+			printf(help_fstring, argv[0]);
+			return 0;
+		case 'l':
+			{
+				const GraphNodeSpecificationRegistry * reg = get_graph_node_specification_registy();
+				for (size_t i = 0; i < reg->capacity; ++i) {
+					if (!reg->key_array[i].key.bytes) {
+						continue;
+					}
+					printf("%.*s\n", (int) reg->key_array[i].key.length, reg->key_array[i].key.bytes);
+				}
+			};
+			return 0;
+		case NCOPT_MODULE_HELP:
+			{
+				GraphNodeSpecification *spec = lookup_graph_node_specification(optarg);
+				if (!spec) {
+					fprintf(stderr, "Unknown node type \"%s\"\n", optarg);
+					return 1;
+				}
+				const char* module_help = NULL;
+				if (module_help) {
+					printf("Help for module \"%s\":\n", optarg);
+					printf("%s\n", module_help);
+				} else {
+					printf("No help provided for node type \"%s\"\n", optarg);
+				}
+			};
+			return 0;
+		default:
+			fprintf(stderr, "Unexpected option ");
+			if ((unsigned int) opt.as_int <= 0xFF) {
+				fprintf(stderr, "'%c'\n", (char) opt.as_int);
+			} else {
+				fprintf(stderr, "%d\n", opt.as_int);
+			}
+			return 1;
+		}
+	}
 
 	ProcessingState state = (ProcessingState) {
 		.wait_delay = NULL,
@@ -18,7 +95,7 @@ main(int argc, char ** argv)
 	config_t config_tree;
 	FullConfig loaded_config;
 	config_init(&config_tree);
-	config_read_file(&config_tree, "config.cfg");
+	config_read_file(&config_tree, config_filename);
 	config_set_auto_convert(&config_tree, CONFIG_TRUE);
 	if (!load_config(config_root_setting(&config_tree), &loaded_config)) {
 		perror("Failed to load config");
