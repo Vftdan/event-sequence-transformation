@@ -392,6 +392,8 @@ load_config(const config_setting_t *config_root, FullConfig *config)
 	const config_setting_t *enums_config = config_setting_get_member(config_root, "enums");
 	const config_setting_t *predicates_config = config_setting_get_member(config_root, "predicates");
 	hash_table_init(&config->constants, NULL);
+	hash_table_insert(&config->constants, hash_table_key_from_cstr("false"), (long long[1]) {0});
+	hash_table_insert(&config->constants, hash_table_key_from_cstr("true"), (long long[1]) {1});
 	populate_event_codes(&config->constants);
 	load_constants_section(constants_config, &config->constants);
 	load_enums_section(enums_config, &config->constants);
