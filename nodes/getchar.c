@@ -29,7 +29,7 @@ handle_io(EventPositionBase * self, int fd, bool is_output)
 		},
 		.ttl = 100,
 		.priority = 10,
-		.payload = buf[0],
+		.payload = (unsigned char) buf[0],
 		.modifiers = EMPTY_MODIFIER_SET,
 		.time = get_current_time(),
 	};

@@ -199,7 +199,7 @@ modifier_operation_parse(const char* name)
 	if (strcmp(name, "reset") == 0) {
 		return MODOP_UNSET;
 	}
-	if (strcmp(name, "togggle") == 0) {
+	if (strcmp(name, "toggle") == 0) {
 		return MODOP_TOGGLE;
 	}
 	return -1;

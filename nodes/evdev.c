@@ -47,7 +47,7 @@ handle_io(EventPositionBase * self, int fd, bool is_output)
 		monotime = absolute_time_sub_relative(realtime, realtime_adj);
 		EventData data = {
 			.code = {
-				.ns = 1,
+				.ns = node->namespace,
 				.major = buf.type,
 				.minor = buf.code,
 			},
