@@ -23,6 +23,9 @@ typedef enum {
 __attribute__((unused)) inline static ModifierSet
 modifier_set_copy(const ModifierSet old)
 {
+	if (!old.byte_length) {
+		return EMPTY_MODIFIER_SET;
+	};
 	ModifierSet result = old;
 	result.bits = malloc(result.byte_length);
 	if (!result.bits) {
