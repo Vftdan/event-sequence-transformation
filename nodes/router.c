@@ -17,7 +17,11 @@ handle_event(EventPositionBase * self, EventNode * event)
 		}
 		if (event_predicate_apply(node->predicates[i], event) == EVPREDRES_ACCEPTED) {
 			if (event_replicate(event, 1)) {
-				event->next->position = &node->as_GraphNode.outputs.elements[i]->as_EventPositionBase;
+				EventNode * replica = event->next;
+				replica->position = &node->as_GraphNode.outputs.elements[i]->as_EventPositionBase;
+				if (!replica->position) {
+					event_destroy(replica);
+				}
 			}
 		}
 	}

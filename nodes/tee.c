@@ -15,6 +15,11 @@ handle_event(EventPositionBase * self, EventNode * event)
 	}
 	for (size_t i = 0; i < count; ++i) {
 		event->position = &node->outputs.elements[i]->as_EventPositionBase;
+		if (!event->position) {
+			EventNode *orphaned = event;
+			event = orphaned->prev;
+			event_destroy(orphaned);
+		}
 		event = event->next;
 	}
 	return true;
