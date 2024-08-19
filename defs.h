@@ -12,8 +12,9 @@
 // So for structs it is usually actual downcast, but for unions it is an upcast
 #define DOWNCAST(contype, basename, ptr) containerof(ptr, contype, as_##basename)
 // Expects ptr to be of type srctype* or void*, returns (dsttype*)ptr
-#define IMPLICIT_CAST(dsttype, srctype, ptr) (((union { typeof(srctype) *src; typeof(dsttype) *dst; }){.src = ptr}).dst)
-#define T_ALLOC(count, T) ((T*)calloc(count, sizeof(T)))
+#define IMPLICIT_CAST(dsttype, srctype, ptr) (((union { typeof(srctype) *src; typeof(dsttype) *dst; }){.src = (ptr)}).dst)
+#define T_ALLOC(count, T) ((T*)calloc((count), sizeof(T)))
+#define T_REALLOC(ptr, count, T) ((T*)reallocarray(IMPLICIT_CAST(void, T, ptr), (count), sizeof(T)))
 
 #define MODULE_CONSTRUCTOR(name) __attribute__((constructor)) static void name(void)
 

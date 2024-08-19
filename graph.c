@@ -5,7 +5,7 @@ static void
 graph_channel_list_resize(GraphChannelList * lst, size_t target)
 {
 	if (target > lst->length) {
-		GraphChannel **new_elements = reallocarray(lst->elements, target, sizeof(GraphChannel*));
+		GraphChannel **new_elements = T_REALLOC(lst->elements, target, GraphChannel*);
 		if (!new_elements) {
 			return;
 		}

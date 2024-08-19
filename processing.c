@@ -10,13 +10,13 @@ io_subscription_list_extend(IOSubscriptionList * lst)
 	size_t capacity = lst->capacity;
 	capacity = capacity + (capacity >> 1) + 1;
 
-	int * new_fds = reallocarray(lst->fds, capacity, sizeof(int));
+	int * new_fds = T_REALLOC(lst->fds, capacity, int);
 	if (!new_fds) {
 		return false;
 	}
 	lst->fds = new_fds;
 
-	IOHandling ** new_subscribers = reallocarray(lst->subscribers, capacity, sizeof(IOHandling*));
+	IOHandling ** new_subscribers = T_REALLOC(lst->subscribers, capacity, IOHandling*);
 	if (!new_subscribers) {
 		return false;
 	}

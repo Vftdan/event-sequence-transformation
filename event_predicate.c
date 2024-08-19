@@ -21,7 +21,7 @@ event_predicate_list_extend(EventPredicateList * lst)
 
 	EventPredicate *new_values;
 	if (lst->values) {
-		new_values = reallocarray(lst->values, capacity, sizeof(EventPredicate));
+		new_values = T_REALLOC(lst->values, capacity, EventPredicate);
 	} else {
 		new_values = T_ALLOC(capacity, EventPredicate);
 	}
