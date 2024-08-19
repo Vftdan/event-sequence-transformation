@@ -3,6 +3,7 @@
 
 #include <time.h>
 #define NANOSECONDS_IN_SECOND 1000000000
+#define MILLISECONDS_IN_SECOND 1000
 
 typedef struct {
 	struct timespec absolute;
@@ -11,6 +12,29 @@ typedef struct {
 typedef struct {
 	struct timespec relative;
 } RelativeTime;
+
+__attribute__((unused)) inline static void
+timespec_assign_nanosecond(struct timespec *target, long long ns)
+{
+	time_t sec = ns / NANOSECONDS_IN_SECOND;
+	if (ns < 0) {
+		sec -= 1;
+	}
+	target->tv_sec = sec;
+	target->tv_nsec = ns - sec * NANOSECONDS_IN_SECOND;
+}
+
+__attribute__((unused)) inline static void
+timespec_assign_millisecond(struct timespec *target, long long ms)
+{
+	time_t sec = ms / MILLISECONDS_IN_SECOND;
+	if (ms < 0) {
+		sec -= 1;
+	}
+	ms -= sec * MILLISECONDS_IN_SECOND;
+	target->tv_sec = sec;
+	target->tv_nsec = ms * (NANOSECONDS_IN_SECOND / MILLISECONDS_IN_SECOND);
+}
 
 __attribute__((unused)) inline static void
 timespec_add(struct timespec *accum, const struct timespec *item)
@@ -84,6 +108,22 @@ absolute_time_sub_absolute(AbsoluteTime lhs, AbsoluteTime rhs)
 		.relative = lhs.absolute,
 	};
 	timespec_sub(&result.relative, &rhs.absolute);
+	return result;
+}
+
+__attribute__((unused)) inline static RelativeTime
+relative_time_from_nanosecond(long long ns)
+{
+	RelativeTime result;
+	timespec_assign_nanosecond(&result.relative, ns);
+	return result;
+}
+
+__attribute__((unused)) inline static RelativeTime
+relative_time_from_millisecond(long long ms)
+{
+	RelativeTime result;
+	timespec_assign_millisecond(&result.relative, ms);
 	return result;
 }
 
