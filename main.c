@@ -99,7 +99,10 @@ main(int argc, char ** argv)
 	config_t config_tree;
 	FullConfig loaded_config;
 	config_init(&config_tree);
-	config_read_file(&config_tree, config_filename);
+	if (config_read_file(&config_tree, config_filename) != CONFIG_TRUE) {
+		fprintf(stderr, "Config syntax error: %s:%d: %s\n", config_error_file(&config_tree), config_error_line(&config_tree), config_error_text(&config_tree));
+		exit(1);
+	}
 	config_set_auto_convert(&config_tree, CONFIG_TRUE);
 	if (!load_config(config_root_setting(&config_tree), &loaded_config)) {
 		perror("Failed to load config");
