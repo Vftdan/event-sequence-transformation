@@ -49,7 +49,7 @@ channel_handle_event(EventPositionBase * self, EventNode * event)
 	event->position = &target->as_EventPositionBase;
 	event->input_index = ch->idx_end;
 	target->as_EventPositionBase.waiting_new_event = false;
-	return false;  // Continue processing events
+	return true;  // Changes were made
 }
 
 void
