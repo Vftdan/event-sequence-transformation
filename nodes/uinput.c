@@ -96,6 +96,12 @@ create(GraphNodeSpecification * spec, GraphNodeConfig * config, InitializationEn
 		return NULL;
 	}
 
+	size_t properties_length = 0;
+	const config_setting_t *properties_setting = config_setting_get_member(config->options, "properties");
+	if (properties_setting) {
+		properties_length = config_setting_length(enabled_codes_setting);
+	}
+
 	struct libevdev *dev = libevdev_new();
 	if (!dev) {
 		free(node);
@@ -106,6 +112,9 @@ create(GraphNodeSpecification * spec, GraphNodeConfig * config, InitializationEn
 	size_t codes_length = config_setting_length(enabled_codes_setting);
 	for (size_t i = 0; i < codes_length; ++i) {
 		load_enable_code(dev, config_setting_get_elem(enabled_codes_setting, i), env);
+	}
+	for (size_t i = 0; i < properties_length; ++i) {
+		libevdev_enable_property(dev, (unsigned int) env_resolve_constant(env, config_setting_get_elem(properties_setting, i)));
 	}
 
 	struct libevdev_uinput *uidev;
@@ -158,6 +167,7 @@ GraphNodeSpecification nodespec_uinput = (GraphNodeSpecification) {
 	.name = "uinput",
 	.documentation = "Writes received events to a new uinput device\nAccepts events on any connector\nDoes not send events"
 	                 "\nOption 'name' (required): device name provided to uinput"
+	                 "\nOption 'properties' (optional): collection of integers --- input properties"
 	                 "\nOption 'enabled_codes' (required): collection of event code specifications:"
 	                 "\n\tField 'major' (required): evdev event type"
 	                 "\n\tField 'minor' (required): evdev event code"
