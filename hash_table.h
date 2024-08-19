@@ -53,10 +53,19 @@ void hash_table_init_impl(HashTableDynamicData * dyndata, size_t value_size, voi
 void hash_table_deinit_impl(HashTableDynamicData * dyndata);
 HashTableIndex hash_table_insert_impl(HashTableDynamicData * dyndata, const HashTableKey key, const void * value_ptr);
 HashTableIndex hash_table_find_impl(const HashTableDynamicData * dyndata, const HashTableKey key);
+bool hash_table_delete_at_index_impl(HashTableDynamicData * dyndata, const HashTableIndex index);
+
+__attribute__((unused)) inline static bool
+hash_table_delete_by_key_impl(HashTableDynamicData * dyndata, const HashTableKey key)
+{
+	return hash_table_delete_at_index_impl(dyndata, hash_table_find_impl(dyndata, key));
+}
 
 #define hash_table_init(ht, value_deinit) hash_table_init_impl(&(ht)->as_HashTableDynamicData, sizeof(*(ht)->value_array), IMPLICIT_CAST(void(void*), void(typeof((ht)->value_array)), value_deinit))
 #define hash_table_deinit(ht) hash_table_deinit_impl(&(ht)->as_HashTableDynamicData)
 #define hash_table_insert(ht, key, value_ptr) hash_table_insert_impl(&(ht)->as_HashTableDynamicData, key, IMPLICIT_CAST(const void, const typeof(*(ht)->value_array), value_ptr))
 #define hash_table_find(ht, key) hash_table_find_impl(&(ht)->as_HashTableDynamicData, key)
+#define hash_table_delete_at_index(ht, index) hash_table_delete_at_index_impl(&(ht)->as_HashTableDynamicData, index)
+#define hash_table_delete_by_key(ht, key) hash_table_delete_by_key_impl(&(ht)->as_HashTableDynamicData, key)
 
 #endif /* end of include guard: HASH_TABLE_H_ */

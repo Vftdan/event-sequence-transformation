@@ -325,3 +325,36 @@ hash_table_find_impl(const HashTableDynamicData * ht, const HashTableKey key)
 
 	return -1;
 }
+
+bool
+hash_table_delete_at_index_impl(HashTableDynamicData * ht, const HashTableIndex index)
+{
+	if (!ht) {
+		return false;
+	}
+
+	if (index < 0 || (size_t) index > ht->capacity) {
+		return false;
+	}
+
+	HashTableKeyEntry *key_entry_ptr = ht->key_array + index;
+	void *value_ptr = ht->value_array + (ht->value_size * index);
+
+	if (!key_entry_ptr->key.bytes) {
+		// No entry at index
+		return false;
+	}
+
+	// TODO find base_index and reduce its max_collision_offset when provably justified
+
+	hash_table_key_deinit_copied(&key_entry_ptr->key);
+	ht->length -= 1;
+
+	void (*value_deinit)(void*) = ht->value_deinit;
+	if (value_deinit) {
+		value_deinit(value_ptr);
+	}
+	memset(value_ptr, 0, ht->value_size);
+
+	return true;
+}
