@@ -35,6 +35,9 @@ EventNode *
 event_create(const EventData * content)
 {
 	EventNode * event = T_ALLOC(1, EventNode);
+	if (!event) {
+		return NULL;
+	}
 	if (content) {
 		event->data = *content;
 		event->data.modifiers = modifier_set_copy(content->modifiers);
