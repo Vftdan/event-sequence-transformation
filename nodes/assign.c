@@ -58,21 +58,33 @@ create(GraphNodeSpecification * spec, GraphNodeConfig * config, InitializationEn
 		has_payload = false;
 	const config_setting_t *setting;
 
-	if ((setting = config_setting_get_member(config->options, "namespace"))) {
-		has_ns = true;
-		source.code.ns = env_resolve_constant(env, setting);
-	}
-	if ((setting = config_setting_get_member(config->options, "major"))) {
-		has_maj = true;
-		source.code.major = env_resolve_constant(env, setting);
-	}
-	if ((setting = config_setting_get_member(config->options, "minor"))) {
-		has_min = true;
-		source.code.minor = env_resolve_constant(env, setting);
-	}
-	if ((setting = config_setting_get_member(config->options, "payload"))) {
-		has_payload = true;
-		source.payload = env_resolve_constant(env, setting);
+	if (config->options) {
+		if ((setting = config_setting_get_member(config->options, "namespace"))) {
+			has_ns = true;
+			source.code.ns = env_resolve_constant(env, setting);
+		}
+		if ((setting = config_setting_get_member(config->options, "major"))) {
+			has_maj = true;
+			source.code.major = env_resolve_constant(env, setting);
+		}
+		if ((setting = config_setting_get_member(config->options, "minor"))) {
+			has_min = true;
+			source.code.minor = env_resolve_constant(env, setting);
+		}
+		if ((setting = config_setting_get_member(config->options, "payload"))) {
+			has_payload = true;
+			source.payload = env_resolve_constant(env, setting);
+		}
+	} else {
+		// Prevent warning for uninitialized variable
+		source = (EventData) {
+			.code = {
+				.ns = 0,
+				.major = 0,
+				.minor = 0,
+			},
+			.payload = 0,
+		};
 	}
 
 	*node = (AssignGraphNode) {

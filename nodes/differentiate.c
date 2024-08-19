@@ -42,7 +42,6 @@ create(GraphNodeSpecification * spec, GraphNodeConfig * config, InitializationEn
 
 	int64_t initial = 0;
 	if (config->options) {
-		// FIXME check config->options for NULL in all node types
 		initial = env_resolve_constant(env, config_setting_get_member(config->options, "initial"));
 	}
 

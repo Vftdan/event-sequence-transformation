@@ -78,6 +78,10 @@ handle_event(EventPositionBase * self, EventNode * event)
 static GraphNode *
 create(GraphNodeSpecification * spec, GraphNodeConfig * config, InitializationEnvironment * env)
 {
+	if (!config->options) {
+		return NULL;
+	}
+
 	UinputGraphNode * node = T_ALLOC(1, UinputGraphNode);
 	if (!node) {
 		return NULL;

@@ -77,7 +77,7 @@ create(GraphNodeSpecification * spec, GraphNodeConfig * config, InitializationEn
 	}
 	const char *filename = NULL;
 	bool should_grab = false;
-	if (config) {
+	if (config->options) {
 		node->namespace = env_resolve_constant(env, config_setting_get_member(config->options, "namespace"));
 		should_grab = env_resolve_constant(env, config_setting_get_member(config->options, "grab")) != 0;
 		config_setting_lookup_string(config->options, "file", &filename);

@@ -50,8 +50,10 @@ handle_event(EventPositionBase * self, EventNode * event)
 static GraphNode *
 create(GraphNodeSpecification * spec, GraphNodeConfig * config, InitializationEnvironment * env)
 {
-	(void) config;
-	(void) env;
+	if (!config->options) {
+		return NULL;
+	}
+
 	ModifyPredicateGraphNode * node = T_ALLOC(1, ModifyPredicateGraphNode);
 	if (!node) {
 		return NULL;

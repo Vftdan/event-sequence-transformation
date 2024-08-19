@@ -70,7 +70,7 @@ create(GraphNodeSpecification * spec, GraphNodeConfig * config, InitializationEn
 			.handle_io = handle_io,
 			.enabled = true,
 		},
-		.namespace = env_resolve_constant(env, config_setting_get_member(config->options, "namespace")),
+		.namespace = config->options ? env_resolve_constant(env, config_setting_get_member(config->options, "namespace")) : 0,
 	};
 	return &node->as_GraphNode;
 }
