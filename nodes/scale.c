@@ -34,18 +34,7 @@ handle_event(EventPositionBase * self, EventNode * event)
 	value += node->center;
 	event->data.payload = value;
 
-	if (count > 1) {
-		count = event_replicate(event, count - 1) + 1;
-	}
-	for (size_t i = 0; i < count; ++i) {
-		event->position = &node->as_GraphNode.outputs.elements[i]->as_EventPositionBase;
-		if (!event->position) {
-			EventNode *orphaned = event;
-			event = orphaned->prev;
-			event_destroy(orphaned);
-		}
-		event = event->next;
-	}
+	graph_node_broadcast_forward_event(&node->as_GraphNode, event);
 	return true;
 }
 

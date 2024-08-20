@@ -42,5 +42,6 @@ void graph_node_delete(GraphNode * self);
 void graph_node_register_io(GraphNode * self, ProcessingState * state);
 void graph_channel_list_init(GraphChannelList * lst);
 void graph_channel_list_deinit(GraphChannelList * lst);
+ssize_t graph_node_broadcast_forward_event(const GraphNode * source, EventNode * event /* may become invalid afterward */);
 
 #endif /* end of include guard: GRAPH_H_ */

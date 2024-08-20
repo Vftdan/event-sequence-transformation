@@ -42,31 +42,6 @@ event_set_del(EventSet * set, const EventNode * element) {
 	return hash_table_delete_by_key(set, hash_event_ptr(element));
 }
 
-static void
-broadcast_event(GraphNode * source, EventNode * event)
-{
-	if (!event) {
-		return;
-	}
-	size_t count = source->outputs.length;
-	if (!count) {
-		event_destroy(event);
-		return;
-	}
-	if (count > 1) {
-		count = event_replicate(event, count - 1) + 1;
-	}
-	for (size_t i = 0; i < count; ++i) {
-		event->position = &source->outputs.elements[i]->as_EventPositionBase;
-		if (!event->position) {
-			EventNode *orphaned = event;
-			event = orphaned->prev;
-			event_destroy(orphaned);
-		}
-		event = event->next;
-	}
-}
-
 static EventNode *
 replicate_and_advance(EventNode ** ptr)
 {
@@ -94,7 +69,7 @@ trigger_new_window(WindowGraphNode * node, EventNode * base)
 			terminator->data.code = node->terminator_prototype.code;
 			terminator->data.modifiers = modifier_set_copy(node->terminator_prototype.modifiers);
 			terminator->data.payload = node->terminator_prototype.payload;
-			broadcast_event(&node->as_GraphNode, terminator);
+			graph_node_broadcast_forward_event(&node->as_GraphNode, terminator);
 		}
 	}
 
@@ -129,7 +104,7 @@ trigger_new_window(WindowGraphNode * node, EventNode * base)
 		}
 		recipient->data = orig->data;
 		recipient->data.modifiers = modifier_set_copy(orig->data.modifiers);
-		broadcast_event(&node->as_GraphNode, recipient);
+		graph_node_broadcast_forward_event(&node->as_GraphNode, recipient);
 	}
 
 	event_destroy(base);
@@ -181,7 +156,7 @@ handle_event(EventPositionBase * self, EventNode * event)
 	}
 
 	if (event_replicate(event, 1)) {
-		broadcast_event(&node->as_GraphNode, event->next);
+		graph_node_broadcast_forward_event(&node->as_GraphNode, event->next);
 	}
 	queue_put(&node->buffer, (QueueValue){.as_ptr = event});
 	event_set_add(&node->buffered_set, event);

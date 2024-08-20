@@ -165,3 +165,37 @@ graph_channel_list_deinit(GraphChannelList * lst)
 	}
 	lst->length = 0;
 }
+
+ssize_t
+graph_node_broadcast_forward_event(const GraphNode * source, EventNode * event)
+{
+	if (!event) {
+		return -1;
+	}
+	if (!source) {
+		event_destroy(event);
+		return -1;
+	}
+	size_t count = source->outputs.length;
+	if (!count) {
+		event_destroy(event);
+		return 0;
+	}
+	if (count > 1) {
+		count = event_replicate(event, count - 1) + 1;
+	}
+	size_t succeses = count;
+	for (size_t i = 0; i < count; ++i) {
+		EventPositionBase *output = &source->outputs.elements[i]->as_EventPositionBase;
+		if (!output) {
+			--succeses;
+			EventNode *orphaned = event;
+			event = orphaned->next;
+			event_destroy(orphaned);
+			continue;
+		}
+		event->position = output;
+		event = event->next;
+	}
+	return succeses;
+}

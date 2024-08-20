@@ -5,23 +5,7 @@ static bool
 handle_event(EventPositionBase * self, EventNode * event)
 {
 	GraphNode *node = DOWNCAST(GraphNode, EventPositionBase, self);
-	size_t count = node->outputs.length;
-	if (!count) {
-		event_destroy(event);
-		return true;
-	}
-	if (count > 1) {
-		count = event_replicate(event, count - 1) + 1;
-	}
-	for (size_t i = 0; i < count; ++i) {
-		event->position = &node->outputs.elements[i]->as_EventPositionBase;
-		if (!event->position) {
-			EventNode *orphaned = event;
-			event = orphaned->prev;
-			event_destroy(orphaned);
-		}
-		event = event->next;
-	}
+	graph_node_broadcast_forward_event(node, event);
 	return true;
 }
 
