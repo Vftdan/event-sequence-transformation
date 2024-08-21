@@ -69,6 +69,7 @@ trigger_new_window(WindowGraphNode * node, EventNode * base)
 			terminator->data.code = node->terminator_prototype.code;
 			terminator->data.modifiers = modifier_set_copy(node->terminator_prototype.modifiers);
 			terminator->data.payload = node->terminator_prototype.payload;
+			// Preserve ttl, priority, time
 			graph_node_broadcast_forward_event(&node->as_GraphNode, terminator);
 		}
 	}
@@ -102,8 +103,7 @@ trigger_new_window(WindowGraphNode * node, EventNode * base)
 		if (!recipient) {
 			continue;
 		}
-		recipient->data = orig->data;
-		recipient->data.modifiers = modifier_set_copy(orig->data.modifiers);
+		recipient->data = event_data_copy(orig->data);
 		graph_node_broadcast_forward_event(&node->as_GraphNode, recipient);
 	}
 

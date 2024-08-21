@@ -21,8 +21,7 @@ event_replicate(EventNode * source, size_t count)
 		}
 		replica->position = NULL;
 		replica->input_index = 0;
-		replica->data = source->data;
-		replica->data.modifiers = modifier_set_copy(source->data.modifiers);
+		replica->data = event_data_copy(source->data);
 		replica->prev = source;
 		replica->next = source->next;
 		source->next->prev = replica;
@@ -39,8 +38,7 @@ event_create(const EventData * content)
 		return NULL;
 	}
 	if (content) {
-		event->data = *content;
-		event->data.modifiers = modifier_set_copy(content->modifiers);
+		event->data = event_data_copy(*content);
 	} else {
 		event->data.time = get_current_time();
 	}

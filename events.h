@@ -49,4 +49,11 @@ EventNode * event_create(const EventData * content);
 void event_destroy(EventNode * self);
 void event_destroy_all();
 
+__attribute__((unused)) inline static EventData
+event_data_copy(EventData orig)
+{
+	orig.modifiers = modifier_set_copy(orig.modifiers);
+	return orig;
+}
+
 #endif /* end of include guard: EVENTS_H_ */
