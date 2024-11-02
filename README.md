@@ -1,4 +1,4 @@
-## Decription
+## Description
 
 (Currently unnamed) event stream transformation tool.
 
@@ -38,7 +38,7 @@ Each event has:
 
 Transformation graph file should be written in [libconfig](https://hyperrealm.github.io/libconfig/libconfig_manual.html#Configuration-Files) format. The file has multiple sections: `constants`, `enums`, `predicates`, `nodes`, `channels`.
 
-Example configurations: [config.cfg](config.cfg), [quadtap-both-click.cfg](quadtap-both-click.cfg).
+Example configurations: [`config.cfg`](config.cfg), [`quadtap-both-click.cfg`](quadtap-both-click.cfg).
 
 `constants` and `enums` define integer constants that can be referenced in integer fields. `enums` create dot-separated name and automatically increments elements of the same enum. There are builtin constants for `linux/input-event-codes.h` with their original name and also in enum format with their prefix replaced with `input_property.`, `event_type.`, `synchronization_event.`, `key_event.`, `button_event.`, `relative_axis.`, `absolute_axis.`, `switch_event.`, `misc_event.`, `led_event.`, `repeat_event.`, `sound_event.`, `force_feedback_status.`, `force_feedback.` (the list is defined in [`event_code_names.cc`](event_code_names.cc)).
 
